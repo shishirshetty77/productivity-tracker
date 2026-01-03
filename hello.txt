@@ -1,4 +1,4 @@
-Hello World - Version 15
+Hello World - Version 16
 Adding more content
 This is a simple text file
 Created for demo purposes
@@ -13,3 +13,4 @@ Infrastructure as Code rocks!
 DevOps is the future
 Automate everything!
 CI/CD pipelines are essential
+Containers make deployment easy
