@@ -1,4 +1,4 @@
-Hello World - Version 9
+Hello World - Version 10
 Adding more content
 This is a simple text file
 Created for demo purposes
@@ -7,3 +7,4 @@ Practice makes perfect
 Terraform EKS Project
 AWS Infrastructure
 Kubernetes Cluster
+Happy Coding!
