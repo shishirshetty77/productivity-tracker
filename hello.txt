@@ -1,4 +1,4 @@
-Hello World - Version 17
+Hello World - Version 18
 Adding more content
 This is a simple text file
 Created for demo purposes
@@ -15,3 +15,4 @@ Automate everything!
 CI/CD pipelines are essential
 Containers make deployment easy
 Monitoring is key to reliability
+Security should be built-in
