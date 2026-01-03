@@ -1,4 +1,4 @@
-Hello World - Version 12
+Hello World - Version 13
 Adding more content
 This is a simple text file
 Created for demo purposes
@@ -10,3 +10,4 @@ Kubernetes Cluster
 Happy Coding!
 New update: January 2026
 Infrastructure as Code rocks!
+DevOps is the future
