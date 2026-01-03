@@ -1,6 +1,7 @@
-Hello World - Version 6
-Adding more content  
+Hello World - Version 7
+Adding more content
 This is a simple text file
 Created for demo purposes
 Learning Git commits
 Practice makes perfect
+Terraform EKS Project
