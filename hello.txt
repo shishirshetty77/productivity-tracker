@@ -1,4 +1,4 @@
-Hello World - Version 18
+Hello World - Version 19
 Adding more content
 This is a simple text file
 Created for demo purposes
@@ -16,3 +16,4 @@ CI/CD pipelines are essential
 Containers make deployment easy
 Monitoring is key to reliability
 Security should be built-in
+GitOps for the win!
