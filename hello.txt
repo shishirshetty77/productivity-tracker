@@ -1,2 +1,3 @@
-Hello World - Version 2
+Hello World - Version 3
 Adding more content
+This is a simple text file
