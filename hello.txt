@@ -1,4 +1,4 @@
-Hello World - Version 19
+Hello World - Version 20
 Adding more content
 This is a simple text file
 Created for demo purposes
@@ -17,3 +17,4 @@ Containers make deployment easy
 Monitoring is key to reliability
 Security should be built-in
 GitOps for the win!
+Keep learning, keep growing!
