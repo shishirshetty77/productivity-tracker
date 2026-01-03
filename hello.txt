@@ -1,4 +1,4 @@
-Hello World - Version 8
+Hello World - Version 9
 Adding more content
 This is a simple text file
 Created for demo purposes
@@ -6,3 +6,4 @@ Learning Git commits
 Practice makes perfect
 Terraform EKS Project
 AWS Infrastructure
+Kubernetes Cluster
