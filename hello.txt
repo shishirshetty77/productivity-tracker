@@ -1,4 +1,4 @@
-Hello World - Version 14
+Hello World - Version 15
 Adding more content
 This is a simple text file
 Created for demo purposes
@@ -12,3 +12,4 @@ New update: January 2026
 Infrastructure as Code rocks!
 DevOps is the future
 Automate everything!
+CI/CD pipelines are essential
