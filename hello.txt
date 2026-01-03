@@ -1,4 +1,5 @@
-Hello World - Version 4
+Hello World - Version 5
 Adding more content
 This is a simple text file
 Created for demo purposes
+Learning Git commits
