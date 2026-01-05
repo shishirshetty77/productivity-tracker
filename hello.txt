@@ -1,4 +1,4 @@
-Hello World - Version 23
+Hello World - Version 24
 Adding more content
 This is a simple text file
 Created for demo purposes
@@ -21,3 +21,4 @@ Keep learning, keep growing!
 Cloud Native is the way
 Microservices architecture
 Observability matters
+Helm charts simplify deployments
