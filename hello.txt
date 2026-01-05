@@ -1,4 +1,4 @@
-Hello World - Version 25
+Hello World - Version 26
 Adding more content
 This is a simple text file
 Created for demo purposes
@@ -23,3 +23,4 @@ Microservices architecture
 Observability matters
 Helm charts simplify deployments
 ArgoCD for continuous delivery
+Prometheus for metrics
