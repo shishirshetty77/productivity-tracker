@@ -1,4 +1,4 @@
-Hello World - Version 26
+Hello World - Version 27
 Adding more content
 This is a simple text file
 Created for demo purposes
@@ -24,3 +24,4 @@ Observability matters
 Helm charts simplify deployments
 ArgoCD for continuous delivery
 Prometheus for metrics
+Grafana for visualization
