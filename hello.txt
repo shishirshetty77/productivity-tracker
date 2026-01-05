@@ -18,4 +18,4 @@ Monitoring is key to reliability
 Security should be built-in
 GitOps for the win!
 Keep learning, keep growing!
-Cloud-native is the way forward!
+Cloud Native is the way
