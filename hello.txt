@@ -1,4 +1,4 @@
-Hello World - Version 27
+Hello World - Version 28
 Adding more content
 This is a simple text file
 Created for demo purposes
@@ -25,3 +25,4 @@ Helm charts simplify deployments
 ArgoCD for continuous delivery
 Prometheus for metrics
 Grafana for visualization
+Service mesh with Istio
