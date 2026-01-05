@@ -1,4 +1,4 @@
-Hello World - Version 21
+Hello World - Version 22
 Adding more content
 This is a simple text file
 Created for demo purposes
@@ -19,3 +19,4 @@ Security should be built-in
 GitOps for the win!
 Keep learning, keep growing!
 Cloud Native is the way
+Microservices architecture
