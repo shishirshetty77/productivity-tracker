@@ -1,4 +1,4 @@
-Hello World - Version 22
+Hello World - Version 23
 Adding more content
 This is a simple text file
 Created for demo purposes
@@ -20,3 +20,4 @@ GitOps for the win!
 Keep learning, keep growing!
 Cloud Native is the way
 Microservices architecture
+Observability matters
