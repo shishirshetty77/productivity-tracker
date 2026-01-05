@@ -1,4 +1,4 @@
-Hello World - Version 20
+Hello World - Version 21
 Adding more content
 This is a simple text file
 Created for demo purposes
@@ -18,3 +18,4 @@ Monitoring is key to reliability
 Security should be built-in
 GitOps for the win!
 Keep learning, keep growing!
+Cloud-native is the way forward!
