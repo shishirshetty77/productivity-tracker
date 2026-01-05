@@ -1,4 +1,4 @@
-Hello World - Version 28
+Hello World - Version 29
 Adding more content
 This is a simple text file
 Created for demo purposes
@@ -26,3 +26,4 @@ ArgoCD for continuous delivery
 Prometheus for metrics
 Grafana for visualization
 Service mesh with Istio
+Secrets management is crucial
