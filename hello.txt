@@ -1,4 +1,4 @@
-Hello World - Version 24
+Hello World - Version 25
 Adding more content
 This is a simple text file
 Created for demo purposes
@@ -22,3 +22,4 @@ Cloud Native is the way
 Microservices architecture
 Observability matters
 Helm charts simplify deployments
+ArgoCD for continuous delivery
