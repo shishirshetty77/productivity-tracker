@@ -37,3 +37,4 @@ out.plan
 .vscode/
 *.swp
 *.swo
+.env
