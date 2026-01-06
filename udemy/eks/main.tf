@@ -1,3 +1,4 @@
+# IAM Role for Cluster
 resource "aws_iam_role" "cluster" {
   name = "${var.cluster_name}-cluster-role"
 
@@ -18,6 +19,7 @@ resource "aws_iam_role_policy_attachment" "cluster_policy" {
   role       = aws_iam_role.cluster.name
 }
 
+# EKS Cluster
 resource "aws_eks_cluster" "main" {
   name     = var.cluster_name
   version  = var.cluster_version
@@ -32,6 +34,7 @@ resource "aws_eks_cluster" "main" {
   ]
 }
 
+# IAM Role for Node Group
 resource "aws_iam_role" "node" {
   name = "${var.cluster_name}-node-role"
 
@@ -58,6 +61,7 @@ resource "aws_iam_role_policy_attachment" "node_policy" {
   role       = aws_iam_role.node.name
 }
 
+# EKS Node Group
 resource "aws_eks_node_group" "main" {
   for_each = var.node_groups
 
