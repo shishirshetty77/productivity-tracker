@@ -13,3 +13,7 @@ output "vpc_id" {
   value       = module.vpc.vpc_id
 }
 
+output "region" {
+  description = "The AWS region"
+  value       = var.region
+}
