@@ -11,6 +11,7 @@ provider "aws" {
   region = var.region
 }
 
+# VPC Module
 module "vpc" {
   source = "./vpc"
 
