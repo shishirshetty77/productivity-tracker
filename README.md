@@ -1,4 +1,9 @@
-# Terraform EKS Project
+# Terraform EKS
+
+## Project Status
+
+Active development.
+Project
 
 This project provisions an EKS cluster using Terraform.
 
