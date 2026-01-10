@@ -7,6 +7,12 @@ Project
 
 This project provisions an EKS cluster using Terraform.
 
+## Features
+
+- VPC creation
+- EKS Cluster provisioning
+- Modular Terraform structure
+
 ## Structure
 
 - `udemy/`: Contains the main Terraform configuration.
