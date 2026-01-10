@@ -13,6 +13,11 @@ This project provisions an EKS cluster using Terraform.
 - `udemy/vpc`: VPC module.
 - `udemy/eks`: EKS module.
 
+## Prerequisites
+
+- Terraform >= 1.0.0
+- AWS CLI configured
+
 ## Usage
 
 1. Initialize Terraform:
