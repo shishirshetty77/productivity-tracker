@@ -1,6 +1,7 @@
 # VPC Resource
 resource "aws_vpc" "main" {
-  cidr_block           = var.vpc_cidr
+  cidr_block = var.vpc_cidr
+  # Enable DNS hostnames for the VPC
   enable_dns_hostnames = true
   enable_dns_support   = true
 
