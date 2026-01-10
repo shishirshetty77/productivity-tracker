@@ -21,7 +21,8 @@ resource "aws_iam_role_policy_attachment" "cluster_policy" {
 
 # EKS Cluster
 resource "aws_eks_cluster" "main" {
-  name     = var.cluster_name
+  name = var.cluster_name
+  # The EKS cluster version
   version  = var.cluster_version
   role_arn = aws_iam_role.cluster.arn
 
