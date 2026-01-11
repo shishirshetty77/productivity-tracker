@@ -15,9 +15,9 @@ This project provisions an EKS cluster using Terraform.
 
 ## Structure
 
-- `udemy/`: Contains the main Terraform configuration.
-- `udemy/vpc`: VPC module.
-- `udemy/eks`: EKS module.
+- `udemy/`: Root directory containing the main Terraform configuration for the EKS cluster.
+- `udemy/vpc`: Terraform module responsible for provisioning the AWS VPC, subnets, and networking components.
+- `udemy/eks`: Terraform module for provisioning the EKS cluster, worker nodes, and related IAM roles.
 
 ## Prerequisites
 
