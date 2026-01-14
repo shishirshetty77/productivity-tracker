@@ -9,12 +9,12 @@ variable "cluster_version" {
 }
 
 variable "vpc_id" {
-  description = "VPC ID"
+  description = "The VPC ID where the EKS cluster will be deployed"
   type        = string
 }
 
 variable "subnet_ids" {
-  description = "Subnet IDs"
+  description = "List of subnet IDs where EKS nodes and endpoints will be placed"
   type        = list(string)
 }
 
