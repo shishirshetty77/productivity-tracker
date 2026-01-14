@@ -38,3 +38,4 @@ out.plan
 *.swp
 *.swo
 .env
+*.bak
