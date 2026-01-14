@@ -13,4 +13,5 @@ Please treat everyone with respect.
 ## Pull Request Process
 
 1. Ensure tests pass.
-2. Update documentation.
+2. Run `terraform fmt` to format code.
+3. Update documentation.
