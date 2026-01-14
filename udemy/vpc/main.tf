@@ -1,5 +1,6 @@
 # VPC Resource
 resource "aws_vpc" "main" {
+  # Managed by Terraform
   cidr_block = var.vpc_cidr
   # Enable DNS hostnames for the VPC
   enable_dns_hostnames = true
