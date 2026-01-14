@@ -1,5 +1,5 @@
 variable "vpc_cidr" {
-  description = "CIDR block for VPC"
+  description = "The IPv4 CIDR block for the VPC"
   type        = string
 }
 
@@ -9,7 +9,7 @@ variable "availability_zones" {
 }
 
 variable "private_subnet_cidrs" {
-  description = "CIDR blocks for private subnets"
+  description = "List of CIDR blocks for private subnets (no direct internet access)"
   type        = list(string)
 }
 
