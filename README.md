@@ -3,9 +3,7 @@
 ## Project Status
 
 Active development.
-Project
-
-This project provisions an EKS cluster using Terraform.
+This project provides a comprehensive Terraform configuration for provisioning an Amazon EKS cluster with VPC and worker nodes.
 
 ## Features
 
