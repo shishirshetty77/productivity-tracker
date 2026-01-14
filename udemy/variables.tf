@@ -1,17 +1,17 @@
 variable "region" {
-  description = "The AWS region to deploy resources into"
+  description = "The AWS region where resources will be created. Default is ap-south-1."
   type        = string
   default     = "ap-south-1"
 }
 
 variable "vpc_cidr" {
-  description = "CIDR block for VPC"
+  description = "The IPv4 CIDR block for the VPC"
   type        = string
   default     = "10.0.0.0/16"
 }
 
 variable "availability_zones" {
-  description = "Availability zones"
+  description = "List of Availability Zones to distribute resources across for high availability"
   type        = list(string)
   default     = ["ap-south-1a", "ap-south-1b", "ap-south-1c"]
 }
