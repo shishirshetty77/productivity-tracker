@@ -40,3 +40,7 @@ This project provides a comprehensive Terraform configuration for provisioning a
    ```sh
    terraform apply
    ```
+
+## Support
+
+For issues, please refer to the `docs/troubleshooting.md` guide or open an issue in the repository.
