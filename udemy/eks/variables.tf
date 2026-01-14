@@ -1,10 +1,10 @@
 variable "cluster_name" {
-  description = "Name of the EKS cluster"
+  description = "Name of the EKS cluster to be created"
   type        = string
 }
 
 variable "cluster_version" {
-  description = "Kubernetes version"
+  description = "Kubernetes version for the EKS cluster (e.g. 1.25)"
   type        = string
 }
 
