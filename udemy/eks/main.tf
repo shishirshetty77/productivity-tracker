@@ -1,3 +1,10 @@
+/**
+ * EKS Cluster and Node Group Configuration
+ *
+ * This file contains the resources for the EKS Cluster, Node Groups,
+ * and associated IAM Roles/Policies.
+ */
+
 # IAM Role for Cluster
 resource "aws_iam_role" "cluster" {
   name = "${var.cluster_name}-cluster-role"
