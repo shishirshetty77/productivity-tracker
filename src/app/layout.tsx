@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0f0f0f",
+  themeColor: "#1a1a2e",
 };
 
 export default function RootLayout({
@@ -27,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} font-sans antialiased bg-[#0f0f0f]`}>
+      <body className={`${inter.variable} font-sans antialiased bg-[#1a1a2e]`}>
         {children}
       </body>
     </html>
