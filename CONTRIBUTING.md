@@ -10,6 +10,12 @@ Thank you for contributing!
 
 Please treat everyone with respect.
 
+Please treat everyone with respect.
+
+## Reporting Bugs
+
+If you find a bug, please open an issue with a clear description and reproduction steps.
+
 ## Pull Request Process
 
 1. Ensure tests pass.
