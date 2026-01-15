@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Day {
+  id          String      @id @default(cuid())
+  date        String      @unique // YYYY-MM-DD format
+  startTime   String      // HH:MM format
+  endTime     String      // HH:MM format
+  completed   Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  timeBlocks  TimeBlock[]
+}
+
+model TimeBlock {
+  id        String   @id @default(cuid())
+  startTime String   // HH:MM format
+  endTime   String   // HH:MM format
+  done      Boolean  @default(false)
+  activity  String   @default("")
+  dayId     String
+  day       Day      @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([dayId])
+}
