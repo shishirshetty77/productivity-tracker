@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, KeyboardEvent } from 'react';
+import { useRef, KeyboardEvent } from 'react';
 
 interface TimeBlockItemProps {
   id: string;

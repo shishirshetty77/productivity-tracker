@@ -466,7 +466,7 @@ function DayCard({
 function TimeBlockRow({ 
   block, 
   onUpdate,
-  index 
+  index: _index 
 }: { 
   block: { id: string; startTime: string; endTime: string; done: boolean; activity: string };
   onUpdate: (data: { done?: boolean; activity?: string }) => void;
