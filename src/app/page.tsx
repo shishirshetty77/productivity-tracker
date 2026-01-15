@@ -103,6 +103,21 @@ export default function Home() {
     }
   };
 
+  const deleteDay = async (day: Day) => {
+    if (!confirm(`Delete ${day.date}? This cannot be undone.`)) return;
+    try {
+      const res = await fetch(`/api/days/${day.date}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        setDays(prev => prev.filter(d => d.id !== day.id));
+        if (expandedDayId === day.id) setExpandedDayId(null);
+      }
+    } catch (error) {
+      console.error('Failed to delete:', error);
+    }
+  };
+
   const handleExport = async (format: 'json' | 'markdown') => {
     const res = await fetch(`/api/export?format=${format}`);
     const blob = await res.blob();
@@ -202,6 +217,7 @@ export default function Home() {
                 onToggleExpand={() => setExpandedDayId(expandedDayId === day.id ? null : day.id)}
                 onUpdateBlock={(blockId, data) => handleTimeBlockUpdate(day.id, blockId, data)}
                 onToggleCompleted={() => toggleDayCompleted(day)}
+                onDelete={() => deleteDay(day)}
               />
             ))}
           </div>
@@ -330,13 +346,15 @@ function DayCard({
   isExpanded, 
   onToggleExpand, 
   onUpdateBlock, 
-  onToggleCompleted
+  onToggleCompleted,
+  onDelete
 }: {
   day: Day;
   isExpanded: boolean;
   onToggleExpand: () => void;
   onUpdateBlock: (blockId: string, data: { done?: boolean; activity?: string }) => void;
   onToggleCompleted: () => void;
+  onDelete: () => void;
 }) {
   const percentage = calculateCompletionPercentage(day.timeBlocks);
   const completedCount = day.timeBlocks.filter(b => b.done).length;
@@ -442,9 +460,17 @@ function DayCard({
           
           {/* Footer */}
           <div className="px-5 py-3 bg-[#1a1a30] border-t border-[#2a2a4a] flex justify-between items-center">
-            <span className="text-xs text-[#6666aa]">
-              {percentage}% complete
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-[#6666aa]">
+                {percentage}% complete
+              </span>
+              <button
+                onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                className="px-3 py-1 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded transition-colors"
+              >
+                Delete
+              </button>
+            </div>
             <button
               onClick={(e) => { e.stopPropagation(); onToggleCompleted(); }}
               className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-colors ${
