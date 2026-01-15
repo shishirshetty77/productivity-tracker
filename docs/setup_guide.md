@@ -4,9 +4,9 @@
 
 Ensure you have the following tools installed:
 
-- Terraform
-- AWS CLI
-- Kubectl
+- [Terraform](https://www.terraform.io/downloads.html) >= 1.0.0
+- [AWS CLI](https://aws.amazon.com/cli/) installed and configured
+- [Kubectl](https://kubernetes.io/docs/tasks/tools/) compatible with your cluster version
 
 ## Getting Started
 
