@@ -44,3 +44,7 @@ This project provides a comprehensive Terraform configuration for provisioning a
 ## Support
 
 For issues, please refer to the `docs/troubleshooting.md` guide or open an issue in the repository.
+
+## License
+
+This project is licensed under the MIT License.
