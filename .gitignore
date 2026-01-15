@@ -39,3 +39,6 @@ out.plan
 *.swo
 .env
 *.bak
+
+# Local Environment
+.env.local
