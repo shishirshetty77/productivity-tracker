@@ -38,12 +38,12 @@ export default function Home() {
     }
   };
 
-  const createDay = async (date: string) => {
+  const createDay = async (date: string, startTime: string = '09:00', endTime: string = '22:00') => {
     try {
       const res = await fetch('/api/days', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date, startTime: '09:00', endTime: '22:00' }),
+        body: JSON.stringify({ date, startTime, endTime }),
       });
       if (res.ok) {
         const day: Day = await res.json();
@@ -174,8 +174,8 @@ export default function Home() {
       {showNewDayModal && (
         <NewDayModal 
           onClose={() => setShowNewDayModal(false)}
-          onCreate={(date) => {
-            createDay(date);
+          onCreate={(date, startTime, endTime) => {
+            createDay(date, startTime, endTime);
             setShowNewDayModal(false);
           }}
           existingDates={days.map(d => d.date)}
@@ -218,12 +218,14 @@ function NewDayModal({
   existingDates 
 }: { 
   onClose: () => void; 
-  onCreate: (date: string) => void;
+  onCreate: (date: string, startTime: string, endTime: string) => void;
   existingDates: string[];
 }) {
   const [selectedDate, setSelectedDate] = useState(getTodayDate());
-  const [customTitle, setCustomTitle] = useState('');
+  const [startTime, setStartTime] = useState('09:00');
+  const [endTime, setEndTime] = useState('22:00');
   const dateExists = existingDates.includes(selectedDate);
+  const isValidTime = startTime < endTime;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -244,6 +246,31 @@ function NewDayModal({
               <p className="mt-1 text-xs text-amber-400">This date already exists</p>
             )}
           </div>
+
+          {/* Time Frame */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-[#aaa] mb-2">Start Time</label>
+              <input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                className="w-full px-4 py-2.5 bg-[#2a2a4a] border border-[#3a3a5a] rounded-lg text-white focus:outline-none focus:border-[#667eea]"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-[#aaa] mb-2">End Time</label>
+              <input
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                className="w-full px-4 py-2.5 bg-[#2a2a4a] border border-[#3a3a5a] rounded-lg text-white focus:outline-none focus:border-[#667eea]"
+              />
+            </div>
+          </div>
+          {!isValidTime && startTime && endTime && (
+            <p className="text-xs text-red-400">End time must be after start time</p>
+          )}
 
           {/* Quick Date Buttons */}
           <div className="flex gap-2">
@@ -285,8 +312,8 @@ function NewDayModal({
             Cancel
           </button>
           <button
-            onClick={() => onCreate(selectedDate)}
-            disabled={dateExists}
+            onClick={() => onCreate(selectedDate, startTime, endTime)}
+            disabled={dateExists || !isValidTime}
             className="px-4 py-2 text-sm font-medium accent-gradient text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Create Day
