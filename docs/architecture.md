@@ -27,3 +27,9 @@ The EKS module deploys:
 ## Diagram
 
 (Placeholder for architecture diagram)
+
+## Security
+
+- **IAM**: Least privilege access using IAM Roles.
+- **Network**: Private subnets for work loads, Public subnets for Load Balancers.
+- **Encryption**: Secrets encryption at rest (optional configuration).
