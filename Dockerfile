@@ -40,7 +40,6 @@ RUN adduser --system --uid 1001 nextjs
 
 # Copy necessary files
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
@@ -52,8 +51,8 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Create data directory for SQLite
-RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data
+# Create prisma directory (will be mounted)
+RUN mkdir -p /app/prisma && chown -R nextjs:nodejs /app/prisma
 
 USER nextjs
 
@@ -61,7 +60,7 @@ EXPOSE 3000
 
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
-ENV DATABASE_URL="file:/app/data/productivity.db"
+ENV DATABASE_URL="file:/app/prisma/dev.db"
 
-# Run migrations and start the server
-CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
+# Start the server (migrations should be run before starting Docker)
+CMD ["node", "server.js"]

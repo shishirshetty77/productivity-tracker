@@ -7,17 +7,21 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=file:/app/data/productivity.db
+      - DATABASE_URL=file:/app/prisma/dev.db
     volumes:
-      - productivity-data:/app/data
+      - ./prisma:/app/prisma # Mount local prisma folder for shared database
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/days"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000/api/days",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-
-volumes:
-  productivity-data:
-    driver: local
