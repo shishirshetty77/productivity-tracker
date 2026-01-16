@@ -2,10 +2,10 @@
 
 A production-ready web application for tracking daily activities in 30-minute intervals. Export your productivity data in LLM-friendly formats for analysis.
 
-![Next.js](https://img.shields.io/badge/Next.js-15-black)
+![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38bdf8)
-![Prisma](https://img.shields.io/badge/Prisma-7-2d3748)
+![Prisma](https://img.shields.io/badge/Prisma-6-2d3748)
 ![SQLite](https://img.shields.io/badge/SQLite-3-003b57)
 
 ## Features
@@ -13,9 +13,10 @@ A production-ready web application for tracking daily activities in 30-minute in
 - 📅 **Date-based Tracking**: Select any date and track activities
 - ⏰ **Flexible Day Windows**: Define your productive hours (e.g., 09:00 to 22:00)
 - 📝 **30-Minute Blocks**: Auto-generated time intervals for consistent tracking
-- ✅ **Quick Entry**: Checkbox completion + activity description
+- ✅ **Mark Complete**: Checkbox for completed work periods
+- ❌ **Mark Skipped**: Cross button for periods you didn't work (auto-fills text)
 - 💾 **Auto-Save**: Changes save automatically with visual feedback
-- 🌙 **Dark Mode**: System-aware with manual toggle
+- 🌙 **Dark Mode**: Notion-style dark theme
 - 📊 **Progress Tracking**: Visual progress bar with completion percentage
 - 📤 **LLM-Friendly Export**: Download all data as JSON or Markdown
 - ⌨️ **Keyboard Navigation**: Arrow keys, Enter, and Tab support
@@ -31,11 +32,16 @@ A production-ready web application for tracking daily activities in 30-minute in
 
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd terraform-eks
+git clone https://github.com/shishirshetty77/productivity-racker.git
+cd productivity-racker
 
 # Install dependencies
 npm install
+
+# Create environment file
+cp .env.example .env
+# Or manually create .env with:
+# DATABASE_URL="file:./prisma/dev.db"
 
 # Set up the database
 npx prisma migrate dev
@@ -46,23 +52,36 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+### Environment Setup
+
+Create a `.env` file in the project root with the following content:
+
+```env
+# Database URL for Prisma (SQLite)
+DATABASE_URL="file:./prisma/dev.db"
+```
+
 ### Docker Setup
 
 ```bash
 # Build and run with Docker Compose
-docker compose up --build
+docker compose build --no-cache
+docker compose up -d
 
 # Stop the containers
 docker compose down
 ```
 
-The app will be available at [http://localhost:3000](http://localhost:3000).
+The Docker app runs on port **3001**: [http://localhost:3001](http://localhost:3001)
+
+> **Note:** Both dev (port 3000) and Docker (port 3001) share the same database file (`prisma/dev.db`), so your data stays consistent across both modes.
 
 ## Project Structure
 
 ```
 ├── prisma/
 │   ├── schema.prisma          # Database schema
+│   ├── dev.db                 # SQLite database (created after migration)
 │   └── migrations/            # Database migrations
 ├── src/
 │   ├── app/
@@ -77,6 +96,7 @@ The app will be available at [http://localhost:3000](http://localhost:3000).
 │   ├── hooks/                 # Custom React hooks
 │   ├── lib/                   # Utilities
 │   └── types/                 # TypeScript types
+├── .env                       # Environment variables (create this!)
 ├── Dockerfile                 # Multi-stage Docker build
 ├── docker-compose.yml         # Docker Compose config
 └── package.json
@@ -122,6 +142,7 @@ The app will be available at [http://localhost:3000](http://localhost:3000).
         "start": "09:00",
         "end": "09:30",
         "done": true,
+        "skipped": false,
         "activity": "Reviewed system design notes"
       }
     ]
@@ -142,6 +163,7 @@ The app will be available at [http://localhost:3000](http://localhost:3000).
 ### Time Blocks
 
 - 09:00–09:30 | ✅ Done | Reviewed system design notes
+- 09:30–10:00 | ❌ Skipped | Did not work in this period
 ```
 
 ## Keyboard Shortcuts
@@ -154,14 +176,14 @@ The app will be available at [http://localhost:3000](http://localhost:3000).
 
 ## Environment Variables
 
-| Variable       | Description          | Default         |
-| -------------- | -------------------- | --------------- |
-| `DATABASE_URL` | SQLite database path | `file:./dev.db` |
+| Variable       | Description          | Required | Default                |
+| -------------- | -------------------- | -------- | ---------------------- |
+| `DATABASE_URL` | SQLite database path | Yes      | `file:./prisma/dev.db` |
 
 ## Development
 
 ```bash
-# Run development server
+# Run development server (port 3000)
 npm run dev
 
 # Type checking
@@ -173,6 +195,13 @@ npm run build
 # Start production server
 npm run start
 ```
+
+## Ports
+
+| Mode   | Port | URL                   |
+| ------ | ---- | --------------------- |
+| Dev    | 3000 | http://localhost:3000 |
+| Docker | 3001 | http://localhost:3001 |
 
 ## License
 
