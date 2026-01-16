@@ -23,6 +23,7 @@ model TimeBlock {
   startTime String   // HH:MM format
   endTime   String   // HH:MM format
   done      Boolean  @default(false)
+  skipped   Boolean  @default(false) // User marked as not worked
   activity  String   @default("")
   dayId     String
   day       Day      @relation(fields: [dayId], references: [id], onDelete: Cascade)

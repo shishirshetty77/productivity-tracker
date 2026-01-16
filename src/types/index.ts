@@ -3,6 +3,7 @@ export interface TimeBlock {
   startTime: string;
   endTime: string;
   done: boolean;
+  skipped: boolean;
   activity: string;
   dayId: string;
 }
@@ -30,6 +31,7 @@ export interface UpdateDayRequest {
 
 export interface UpdateTimeBlockRequest {
   done?: boolean;
+  skipped?: boolean;
   activity?: string;
 }
 

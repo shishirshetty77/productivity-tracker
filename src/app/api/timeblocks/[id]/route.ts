@@ -10,7 +10,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const body = await request.json();
-    const { done, activity } = body;
+    const { done, skipped, activity } = body;
 
     const existingBlock = await prisma.timeBlock.findUnique({
       where: { id },
@@ -24,6 +24,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       where: { id },
       data: {
         done: done ?? existingBlock.done,
+        skipped: skipped ?? existingBlock.skipped,
         activity: activity ?? existingBlock.activity,
       },
     });
