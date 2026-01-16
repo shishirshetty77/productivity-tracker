@@ -4,52 +4,52 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Single color scheme - balanced dark */
+/* Notion-style color scheme */
 :root {
   color-scheme: dark;
 }
 
-/* Base styles - Balanced dark theme (not too dark) */
+/* Base styles - Notion dark theme */
 body {
-  background-color: #1a1a2e;
-  color: #e5e5e5;
+  background-color: #191919;
+  color: rgba(255, 255, 255, 0.81);
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - Notion style */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #232340;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #4a4a6a;
+  background: #373737;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #5a5a7a;
+  background: #4a4a4a;
 }
 
 /* Focus visible styles */
 :focus-visible {
-  outline: 2px solid #667eea;
+  outline: 2px solid rgba(255, 255, 255, 0.2);
   outline-offset: 2px;
 }
 
 /* Selection colors */
 ::selection {
-  background-color: #667eea;
+  background-color: rgba(45, 170, 219, 0.3);
   color: white;
 }
 
 /* Input placeholder colors */
 input::placeholder,
 textarea::placeholder {
-  color: #6b6b8a;
+  color: rgba(255, 255, 255, 0.3);
 }
 
 /* Auto-expanding textarea */
@@ -59,19 +59,18 @@ textarea::placeholder {
   overflow: hidden;
 }
 
-/* Card hover effects */
+/* Card hover effects - subtle like Notion */
 .day-card {
-  transition: all 0.2s ease;
+  transition: background-color 0.15s ease;
 }
 
 .day-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  background-color: #252525;
 }
 
 /* Smooth expand animation */
 .expand-content {
-  animation: expandIn 0.2s ease-out;
+  animation: expandIn 0.15s ease-out;
 }
 
 @keyframes expandIn {
@@ -85,15 +84,21 @@ textarea::placeholder {
   }
 }
 
-/* Gradient accent */
-.accent-gradient {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+/* Notion accent - subtle gray-blue */
+.accent-notion {
+  background-color: #2383e2;
 }
 
-/* Completed block style */
+/* Completed block style - green tint */
 .block-completed {
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.08) 100%);
-  border-color: rgba(34, 197, 94, 0.35);
+  background: rgba(46, 170, 110, 0.08);
+  border-color: rgba(46, 170, 110, 0.3);
+}
+
+/* Skipped block style - red tint */
+.block-skipped {
+  background: rgba(235, 87, 87, 0.08);
+  border-color: rgba(235, 87, 87, 0.3);
 }
 
 /* Time badge */
@@ -104,9 +109,10 @@ textarea::placeholder {
 }
 
 /* Date picker styling */
-input[type="date"]::-webkit-calendar-picker-indicator {
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
-  filter: invert(0.6);
+  filter: invert(0.7);
 }
 
 /* Editable title */
@@ -115,7 +121,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   border: none;
   outline: none;
   font-weight: 600;
-  color: white;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .editable-title:focus {

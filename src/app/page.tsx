@@ -131,20 +131,20 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-[#1a1a2e]">
+    <main className="min-h-screen bg-[#191919]">
       {/* Header */}
-      <header className="sticky top-0 z-20 bg-[#1a1a2e]/95 backdrop-blur border-b border-[#2a2a4a]">
+      <header className="sticky top-0 z-20 bg-[#191919]/95 backdrop-blur border-b border-[#373737]">
         <div className="max-w-5xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 accent-gradient rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 accent-notion rounded-xl flex items-center justify-center">
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div>
                 <h1 className="text-lg font-bold text-white">Productivity Tracker</h1>
-                <p className="text-xs text-[#8888aa]">30-minute intervals</p>
+                <p className="text-xs text-[#9b9b9b]">30-minute intervals</p>
               </div>
             </div>
             
@@ -162,13 +162,13 @@ export default function Home() {
               <div className="flex gap-2">
                 <button
                   onClick={() => handleExport('json')}
-                  className="px-3 py-1.5 text-xs font-medium bg-[#252545] hover:bg-[#303055] text-[#aaa] hover:text-white rounded-lg transition-colors"
+                  className="px-3 py-1.5 text-xs font-medium bg-[#2f2f2f] hover:bg-[#3f3f3f] text-[#aaa] hover:text-white rounded-lg transition-colors"
                 >
                   Export JSON
                 </button>
                 <button
                   onClick={() => handleExport('markdown')}
-                  className="px-3 py-1.5 text-xs font-medium bg-[#252545] hover:bg-[#303055] text-[#aaa] hover:text-white rounded-lg transition-colors"
+                  className="px-3 py-1.5 text-xs font-medium bg-[#2f2f2f] hover:bg-[#3f3f3f] text-[#aaa] hover:text-white rounded-lg transition-colors"
                 >
                   Export MD
                 </button>
@@ -176,7 +176,7 @@ export default function Home() {
               
               <button
                 onClick={() => setShowNewDayModal(true)}
-                className="px-4 py-2 text-sm font-medium accent-gradient text-white rounded-lg hover:opacity-90 transition-opacity"
+                className="px-4 py-2 text-sm font-medium accent-notion text-white rounded-lg hover:opacity-90 transition-opacity"
               >
                 + New Day
               </button>
@@ -201,11 +201,11 @@ export default function Home() {
       <div className="max-w-5xl mx-auto px-4 py-6">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-[#444] border-t-[#667eea] rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-[#444] border-t-[#2383e2] rounded-full animate-spin" />
           </div>
         ) : days.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-[#8888aa]">No days yet. Create your first day!</p>
+            <p className="text-[#9b9b9b]">No days yet. Create your first day!</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -245,7 +245,7 @@ function NewDayModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-[#202040] rounded-2xl p-6 w-full max-w-md border border-[#3a3a5a] shadow-xl">
+      <div className="bg-[#202020] rounded-2xl p-6 w-full max-w-md border border-[#4a4a4a] shadow-xl">
         <h2 className="text-lg font-semibold text-white mb-4">Create New Day</h2>
         
         <div className="space-y-4">
@@ -256,7 +256,7 @@ function NewDayModal({
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full px-4 py-2.5 bg-[#2a2a4a] border border-[#3a3a5a] rounded-lg text-white focus:outline-none focus:border-[#667eea]"
+              className="w-full px-4 py-2.5 bg-[#373737] border border-[#4a4a4a] rounded-lg text-white focus:outline-none focus:border-[#2383e2]"
             />
             {dateExists && (
               <p className="mt-1 text-xs text-amber-400">This date already exists</p>
@@ -271,7 +271,7 @@ function NewDayModal({
                 type="time"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="w-full px-4 py-2.5 bg-[#2a2a4a] border border-[#3a3a5a] rounded-lg text-white focus:outline-none focus:border-[#667eea]"
+                className="w-full px-4 py-2.5 bg-[#373737] border border-[#4a4a4a] rounded-lg text-white focus:outline-none focus:border-[#2383e2]"
               />
             </div>
             <div>
@@ -280,7 +280,7 @@ function NewDayModal({
                 type="time"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
-                className="w-full px-4 py-2.5 bg-[#2a2a4a] border border-[#3a3a5a] rounded-lg text-white focus:outline-none focus:border-[#667eea]"
+                className="w-full px-4 py-2.5 bg-[#373737] border border-[#4a4a4a] rounded-lg text-white focus:outline-none focus:border-[#2383e2]"
               />
             </div>
           </div>
@@ -292,7 +292,7 @@ function NewDayModal({
           <div className="flex gap-2">
             <button
               onClick={() => setSelectedDate(getTodayDate())}
-              className="px-3 py-1.5 text-xs bg-[#2a2a4a] hover:bg-[#3a3a5a] text-[#aaa] hover:text-white rounded-lg transition-colors"
+              className="px-3 py-1.5 text-xs bg-[#373737] hover:bg-[#4a4a4a] text-[#aaa] hover:text-white rounded-lg transition-colors"
             >
               Today
             </button>
@@ -302,7 +302,7 @@ function NewDayModal({
                 tomorrow.setDate(tomorrow.getDate() + 1);
                 setSelectedDate(tomorrow.toISOString().split('T')[0]);
               }}
-              className="px-3 py-1.5 text-xs bg-[#2a2a4a] hover:bg-[#3a3a5a] text-[#aaa] hover:text-white rounded-lg transition-colors"
+              className="px-3 py-1.5 text-xs bg-[#373737] hover:bg-[#4a4a4a] text-[#aaa] hover:text-white rounded-lg transition-colors"
             >
               Tomorrow
             </button>
@@ -312,7 +312,7 @@ function NewDayModal({
                 yesterday.setDate(yesterday.getDate() - 1);
                 setSelectedDate(yesterday.toISOString().split('T')[0]);
               }}
-              className="px-3 py-1.5 text-xs bg-[#2a2a4a] hover:bg-[#3a3a5a] text-[#aaa] hover:text-white rounded-lg transition-colors"
+              className="px-3 py-1.5 text-xs bg-[#373737] hover:bg-[#4a4a4a] text-[#aaa] hover:text-white rounded-lg transition-colors"
             >
               Yesterday
             </button>
@@ -330,7 +330,7 @@ function NewDayModal({
           <button
             onClick={() => onCreate(selectedDate, startTime, endTime)}
             disabled={dateExists || !isValidTime}
-            className="px-4 py-2 text-sm font-medium accent-gradient text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm font-medium accent-notion text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Create Day
           </button>
@@ -376,7 +376,7 @@ function DayCard({
   const displayName = customName || formatDate(day.date);
 
   return (
-    <div className={`day-card bg-[#202040] border border-[#2a2a4a] rounded-2xl overflow-hidden ${day.completed ? 'border-green-500/30' : ''}`}>
+    <div className={`day-card bg-[#202020] border border-[#373737] rounded-2xl overflow-hidden ${day.completed ? 'border-green-500/30' : ''}`}>
       {/* Card Header - Always Visible */}
       <div className="px-5 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -390,24 +390,24 @@ function DayCard({
                   onBlur={() => setIsEditingName(false)}
                   onKeyDown={(e) => e.key === 'Enter' && setIsEditingName(false)}
                   placeholder={formatDate(day.date)}
-                  className="editable-title text-white bg-[#2a2a4a] px-2 py-1 rounded w-40"
+                  className="editable-title text-white bg-[#373737] px-2 py-1 rounded w-40"
                   autoFocus
                 />
               ) : (
                 <button
                   onClick={() => setIsEditingName(true)}
-                  className="text-white font-semibold hover:text-[#667eea] transition-colors"
+                  className="text-white font-semibold hover:text-[#2383e2] transition-colors"
                   title="Click to edit name"
                 >
                   {displayName}
                 </button>
               )}
-              <span className="text-xs text-[#6666aa]">({day.date})</span>
+              <span className="text-xs text-[#5a5a5a]">({day.date})</span>
               {day.completed && (
                 <span className="px-2 py-0.5 text-xs bg-green-500/20 text-green-400 rounded-full">Done</span>
               )}
             </div>
-            <div className="text-xs text-[#6666aa] mt-0.5">
+            <div className="text-xs text-[#5a5a5a] mt-0.5">
               {day.startTime} – {day.endTime} • {day.timeBlocks.length} blocks
             </div>
           </div>
@@ -416,13 +416,13 @@ function DayCard({
         <div className="flex items-center gap-4">
           {/* Progress */}
           <div className="flex items-center gap-3">
-            <div className="w-24 h-2 bg-[#2a2a4a] rounded-full overflow-hidden">
+            <div className="w-24 h-2 bg-[#373737] rounded-full overflow-hidden">
               <div 
-                className="h-full accent-gradient transition-all duration-300"
+                className="h-full accent-notion transition-all duration-300"
                 style={{ width: `${percentage}%` }}
               />
             </div>
-            <span className="text-xs text-[#8888aa] font-mono w-16 text-right">
+            <span className="text-xs text-[#9b9b9b] font-mono w-16 text-right">
               {completedCount}/{day.timeBlocks.length}
             </span>
           </div>
@@ -430,10 +430,10 @@ function DayCard({
           {/* Expand Icon */}
           <button
             onClick={onToggleExpand}
-            className="p-2 hover:bg-[#2a2a4a] rounded-lg transition-colors"
+            className="p-2 hover:bg-[#373737] rounded-lg transition-colors"
           >
             <svg 
-              className={`w-5 h-5 text-[#8888aa] transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+              className={`w-5 h-5 text-[#9b9b9b] transition-transform ${isExpanded ? 'rotate-180' : ''}`}
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"
@@ -446,7 +446,7 @@ function DayCard({
 
       {/* Expanded Content */}
       {isExpanded && (
-        <div className="expand-content border-t border-[#2a2a4a]">
+        <div className="expand-content border-t border-[#373737]">
           <div className="p-5 space-y-2">
             {day.timeBlocks.map((block, index) => (
               <TimeBlockRow
@@ -459,9 +459,9 @@ function DayCard({
           </div>
           
           {/* Footer */}
-          <div className="px-5 py-3 bg-[#1a1a30] border-t border-[#2a2a4a] flex justify-between items-center">
+          <div className="px-5 py-3 bg-[#1f1f1f] border-t border-[#373737] flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <span className="text-xs text-[#6666aa]">
+              <span className="text-xs text-[#5a5a5a]">
                 {percentage}% complete
               </span>
               <button
@@ -476,7 +476,7 @@ function DayCard({
               className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-colors ${
                 day.completed 
                   ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' 
-                  : 'bg-[#2a2a4a] text-[#8888aa] hover:bg-[#3a3a5a] hover:text-white'
+                  : 'bg-[#373737] text-[#9b9b9b] hover:bg-[#4a4a4a] hover:text-white'
               }`}
             >
               {day.completed ? '✓ Completed' : 'Mark Complete'}
@@ -535,14 +535,14 @@ function TimeBlockRow({
     <div className={`flex items-start gap-3 p-3 rounded-xl transition-colors ${
       isDone ? 'bg-green-500/10 border border-green-500/30' : 
       isSkipped ? 'bg-red-500/10 border border-red-500/30' : 
-      'bg-[#252550] hover:bg-[#2a2a55]'
+      'bg-[#252525] hover:bg-[#2d2d2d]'
     }`}>
       {/* Time Badge */}
       <div className="flex-shrink-0 pt-2">
         <span className={`time-badge px-2 py-1 rounded ${
           isDone ? 'bg-green-500/20 text-green-400' : 
           isSkipped ? 'bg-red-500/20 text-red-400' :
-          'bg-[#2a2a4a] text-[#8888aa]'
+          'bg-[#373737] text-[#9b9b9b]'
         }`}>
           {block.startTime}
         </span>
@@ -555,7 +555,7 @@ function TimeBlockRow({
         className={`flex-shrink-0 mt-2 w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
           isDone 
             ? 'bg-green-500 border-green-500' 
-            : 'border-[#5555aa] hover:border-green-500'
+            : 'border-[#4a4a4a] hover:border-green-500'
         }`}
       >
         {isDone && (
@@ -572,7 +572,7 @@ function TimeBlockRow({
         className={`flex-shrink-0 mt-2 w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
           isSkipped 
             ? 'bg-red-500 border-red-500' 
-            : 'border-[#5555aa] hover:border-red-500'
+            : 'border-[#4a4a4a] hover:border-red-500'
         }`}
       >
         {isSkipped && (
