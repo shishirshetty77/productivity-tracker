@@ -8,18 +8,6 @@ A production-ready web application for tracking daily activities in 30-minute in
 ![Prisma](https://img.shields.io/badge/Prisma-6-2d3748)
 ![SQLite](https://img.shields.io/badge/SQLite-3-003b57)
 
-## Features
-
-- 📅 **Date-based Tracking**: Select any date and track activities
-- ⏰ **Flexible Day Windows**: Define your productive hours (e.g., 09:00 to 22:00)
-- 📝 **30-Minute Blocks**: Auto-generated time intervals for consistent tracking
-- ✅ **Mark Complete**: Checkbox for completed work periods
-- ❌ **Mark Skipped**: Cross button for periods you didn't work (auto-fills text)
-- 💾 **Auto-Save**: Changes save automatically with visual feedback
-- 🌙 **Dark Mode**: Notion-style dark theme
-- 📊 **Progress Tracking**: Visual progress bar with completion percentage
-- 📤 **LLM-Friendly Export**: Download all data as JSON or Markdown
-- ⌨️ **Keyboard Navigation**: Arrow keys, Enter, and Tab support
 
 ## Quick Start
 
@@ -41,7 +29,9 @@ npm install
 # Create environment file
 cp .env.example .env
 # Or manually create .env with:
-# DATABASE_URL="file:./prisma/dev.db"
+
+# DATABASE_URL="file:./dev.db"
+
 
 # Set up the database
 npx prisma migrate dev
