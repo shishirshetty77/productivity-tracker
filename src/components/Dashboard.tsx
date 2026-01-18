@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Day } from '@/types';
-import { generateTimeBlocks, formatTime } from '@/lib/utils';
+import { generateTimeBlocks, formatTime, getTodayDate } from '@/lib/utils';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import DayCard from '@/components/DayCard';
 import Link from 'next/link';
@@ -11,7 +11,7 @@ import { logout } from '@/app/actions/logout';
 interface DashboardProps {
   user: {
     id: string;
-    name: string;
+    name?: string | null;
     role: string;
   };
 }
