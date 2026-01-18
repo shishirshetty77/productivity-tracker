@@ -7,15 +7,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String   // Hashed
+  role      String   @default("USER") // "ADMIN" or "USER"
+  createdAt DateTime @default(now())
+  days      Day[]
+}
+
 model Day {
   id          String      @id @default(cuid())
-  date        String      @unique // YYYY-MM-DD format
+  date        String      // YYYY-MM-DD format
   startTime   String      // HH:MM format
   endTime     String      // HH:MM format
   completed   Boolean     @default(false)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   timeBlocks  TimeBlock[]
+  
+  userId      String?     // Optional for migration compatibility, will be required later
+  user        User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([date, userId])
 }
 
 model TimeBlock {

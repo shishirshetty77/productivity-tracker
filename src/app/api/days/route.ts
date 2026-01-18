@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateTimeBlocks } from '@/lib/utils';
+import { auth } from '@/auth';
 
-// GET /api/days - Get all days
+// GET /api/days - Get all days for the logged-in user
 export async function GET() {
+  const session = await auth();
+  if (!session || !session.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const days = await prisma.day.findMany({
+      where: {
+        userId: session.user.id
+      },
       include: {
         timeBlocks: {
           orderBy: { startTime: 'asc' },
@@ -22,6 +31,11 @@ export async function GET() {
 
 // POST /api/days - Create a new day with time blocks
 export async function POST(request: NextRequest) {
+  const session = await auth();
+  if (!session || !session.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     const { date, startTime, endTime } = body;
@@ -33,9 +47,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if day already exists
-    const existingDay = await prisma.day.findUnique({
-      where: { date },
+    // Check if day already exists for THIS user
+    const existingDay = await prisma.day.findFirst({
+      where: { 
+        date,
+        userId: session.user.id 
+      },
     });
 
     if (existingDay) {
@@ -48,12 +65,13 @@ export async function POST(request: NextRequest) {
     // Generate time blocks
     const blocks = generateTimeBlocks(startTime, endTime);
 
-    // Create day with time blocks
+    // Create day with time blocks linked to user
     const day = await prisma.day.create({
       data: {
         date,
         startTime,
         endTime,
+        userId: session.user.id,
         timeBlocks: {
           create: blocks.map((block) => ({
             startTime: block.startTime,

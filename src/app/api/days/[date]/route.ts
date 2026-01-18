@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateTimeBlocks } from '@/lib/utils';
+import { auth } from '@/auth';
 
 interface RouteParams {
   params: Promise<{ date: string }>;
@@ -8,11 +9,20 @@ interface RouteParams {
 
 // GET /api/days/[date] - Get a specific day
 export async function GET(request: NextRequest, { params }: RouteParams) {
+  const session = await auth();
+  if (!session || !session.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { date } = await params;
     
-    const day = await prisma.day.findUnique({
-      where: { date },
+    // Check ownership
+    const day = await prisma.day.findFirst({
+      where: { 
+        date,
+        userId: session.user.id 
+      },
       include: {
         timeBlocks: {
           orderBy: { startTime: 'asc' },
@@ -33,13 +43,21 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 // PUT /api/days/[date] - Update a day
 export async function PUT(request: NextRequest, { params }: RouteParams) {
+  const session = await auth();
+  if (!session || !session.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { date } = await params;
     const body = await request.json();
     const { startTime, endTime, completed } = body;
 
-    const existingDay = await prisma.day.findUnique({
-      where: { date },
+    const existingDay = await prisma.day.findFirst({
+      where: { 
+        date,
+        userId: session.user.id 
+      },
       include: { timeBlocks: true },
     });
 
@@ -63,7 +81,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       });
 
       const day = await prisma.day.update({
-        where: { date },
+        where: { id: existingDay.id }, // Use ID for update safety
         data: {
           startTime: newStartTime,
           endTime: newEndTime,
@@ -87,7 +105,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     // Just update completed status
     const day = await prisma.day.update({
-      where: { date },
+      where: { id: existingDay.id },
       data: {
         completed: completed ?? existingDay.completed,
       },
@@ -107,11 +125,19 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
 // DELETE /api/days/[date] - Delete a day
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  const session = await auth();
+  if (!session || !session.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { date } = await params;
 
-    const existingDay = await prisma.day.findUnique({
-      where: { date },
+    const existingDay = await prisma.day.findFirst({
+      where: { 
+        date,
+        userId: session.user.id 
+      },
     });
 
     if (!existingDay) {
@@ -119,7 +145,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     await prisma.day.delete({
-      where: { date },
+      where: { id: existingDay.id },
     });
 
     return NextResponse.json({ message: 'Day deleted successfully' });

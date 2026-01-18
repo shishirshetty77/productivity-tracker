@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { auth } from '@/auth';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -7,13 +8,24 @@ interface RouteParams {
 
 // PUT /api/timeblocks/[id] - Update a time block
 export async function PUT(request: NextRequest, { params }: RouteParams) {
+  const session = await auth();
+  if (!session || !session.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { id } = await params;
     const body = await request.json();
     const { done, skipped, activity } = body;
 
-    const existingBlock = await prisma.timeBlock.findUnique({
-      where: { id },
+    // Verify ownership by checking if the block belongs to a day owned by the user
+    const existingBlock = await prisma.timeBlock.findFirst({
+      where: { 
+        id,
+        day: {
+            userId: session.user.id
+        }
+      },
     });
 
     if (!existingBlock) {
