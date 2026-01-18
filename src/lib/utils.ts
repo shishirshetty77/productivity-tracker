@@ -66,3 +66,14 @@ export function calculateCompletionPercentage(timeBlocks: { done: boolean }[]): 
   const completed = timeBlocks.filter(block => block.done).length;
   return Math.round((completed / timeBlocks.length) * 100);
 }
+
+/**
+ * Format HH:MM string to 12-hour format with AM/PM
+ */
+export function formatTime(time: string): string {
+  const [hours, minutes] = time.split(':');
+  const h = parseInt(hours);
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  return `${h12}:${minutes} ${ampm}`;
+}
