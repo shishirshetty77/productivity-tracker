@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: { { include "productivity-tracker.fullname" . } }
+  labels: { { - include "productivity-tracker.labels" . | nindent 4 } }
+spec:
+  type: { { .Values.service.type } }
+  ports:
+    - port: { { .Values.service.port } }
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    { { - include "productivity-tracker.selectorLabels" . | nindent 4 } }

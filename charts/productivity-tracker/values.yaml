@@ -1,0 +1,24 @@
+replicaCount: 1
+
+image:
+  repository: shishirshetty77/productivity-tracker
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 3000
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+env:
+  # DATABASE_URL should be provided via secret or values override in production
+  DATABASE_URL: "postgresql://user:password@postgres:5432/productivity_tracker"
+  AUTH_SECRET: "change-me-in-production"

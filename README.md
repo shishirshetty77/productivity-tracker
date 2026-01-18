@@ -1,198 +1,71 @@
-# Half-Hour Productivity Tracker
+# Productivity Tracker
 
-A production-ready web application for tracking daily activities in 30-minute intervals. Export your productivity data in LLM-friendly formats for analysis.
+> A simple, distraction-free tool to track your day in 30-minute blocks.
 
-![Next.js](https://img.shields.io/badge/Next.js-16-black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38bdf8)
-![Prisma](https://img.shields.io/badge/Prisma-6-2d3748)
-![SQLite](https://img.shields.io/badge/SQLite-3-003b57)
+![Productivity Tracker Demo](https://placehold.co/600x400/202020/white?text=Productivity+Tracker+Demo)
 
+## Why this exists
 
-## Quick Start
+I realized that tracking every single minute is exhausting. Instead, I just want to know: **"Was this half-hour productive?"**
 
-### Prerequisites
+This app helps you:
+
+- ✅ Mark blocks as "Done" or "Skipped" (because life happens).
+- 📝 Jot down what you actually did.
+- 🔒 Keep your data private with a simple login.
+- 📊 Export your data to JSON.
+
+## The Stack
+
+Built with love and modern tech:
+
+- **Next.js 15**: For a fast, responsive UI.
+- **PostgreSQL**: Reliable data storage (via Neon).
+- **Prisma**: Type-safe database interactions.
+- **Tailwind CSS**: For that sleek, dark-mode capability.
+- **Kubernetes Ready**: Helm chart included!
+
+## How to Run Locally
+
+### 1. Prerequisites
 
 - Node.js 18+
-- npm or yarn
+- PostgreSQL (or use a free Neon instance)
 
-### Development Setup
+### 2. Setup
 
 ```bash
-# Clone the repository
-git clone https://github.com/shishirshetty77/productivity-racker.git
-cd productivity-racker
+# Clone the repo
+git clone https://github.com/shishirshetty77/productivity-tracker.git
+cd productivity-tracker
 
 # Install dependencies
 npm install
 
-# Create environment file
+# Setup Environment
 cp .env.example .env
-# Or manually create .env with:
+# Edit .env and add your DATABASE_URL and a random AUTH_SECRET
+```
 
-# DATABASE_URL="file:./dev.db"
+### 3. Run
 
+```bash
+# Push database schema
+npx prisma db push
 
-# Set up the database
-npx prisma migrate dev
-
-# Start development server
+# Start the dev server
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000) and start tracking!
 
-### Environment Setup
+## Deployment
 
-Create a `.env` file in the project root with the following content:
+This app is ready for:
 
-```env
-# Database URL for Prisma (SQLite)
-DATABASE_URL="file:./prisma/dev.db"
-```
+- **Vercel**: Zero config needed.
+- **Kubernetes**: Use the included Helm chart in `charts/productivity-tracker`.
 
-### Docker Setup
+---
 
-```bash
-# Build and run with Docker Compose
-docker compose build --no-cache
-docker compose up -d
-
-# Stop the containers
-docker compose down
-```
-
-The Docker app runs on port **3001**: [http://localhost:3001](http://localhost:3001)
-
-> **Note:** Both dev (port 3000) and Docker (port 3001) share the same database file (`prisma/dev.db`), so your data stays consistent across both modes.
-
-## Project Structure
-
-```
-├── prisma/
-│   ├── schema.prisma          # Database schema
-│   ├── dev.db                 # SQLite database (created after migration)
-│   └── migrations/            # Database migrations
-├── src/
-│   ├── app/
-│   │   ├── api/               # API routes
-│   │   │   ├── days/          # Day CRUD operations
-│   │   │   ├── timeblocks/    # TimeBlock updates
-│   │   │   └── export/        # Data export
-│   │   ├── globals.css        # Global styles
-│   │   ├── layout.tsx         # Root layout
-│   │   └── page.tsx           # Main page
-│   ├── components/            # React components
-│   ├── hooks/                 # Custom React hooks
-│   ├── lib/                   # Utilities
-│   └── types/                 # TypeScript types
-├── .env                       # Environment variables (create this!)
-├── Dockerfile                 # Multi-stage Docker build
-├── docker-compose.yml         # Docker Compose config
-└── package.json
-```
-
-## API Reference
-
-### Days
-
-| Method | Endpoint           | Description      |
-| ------ | ------------------ | ---------------- |
-| GET    | `/api/days`        | Get all days     |
-| POST   | `/api/days`        | Create a new day |
-| GET    | `/api/days/[date]` | Get day by date  |
-| PUT    | `/api/days/[date]` | Update day       |
-| DELETE | `/api/days/[date]` | Delete day       |
-
-### Time Blocks
-
-| Method | Endpoint               | Description       |
-| ------ | ---------------------- | ----------------- |
-| PUT    | `/api/timeblocks/[id]` | Update time block |
-
-### Export
-
-| Method | Endpoint                      | Description        |
-| ------ | ----------------------------- | ------------------ |
-| GET    | `/api/export?format=json`     | Export as JSON     |
-| GET    | `/api/export?format=markdown` | Export as Markdown |
-
-## Export Format
-
-### JSON (LLM-friendly)
-
-```json
-[
-  {
-    "date": "2024-01-15",
-    "day_window": "09:00-17:00",
-    "completed": true,
-    "intervals": [
-      {
-        "start": "09:00",
-        "end": "09:30",
-        "done": true,
-        "skipped": false,
-        "activity": "Reviewed system design notes"
-      }
-    ]
-  }
-]
-```
-
-### Markdown
-
-```markdown
-# Productivity Log
-
-## Date: 2024-01-15
-
-- Day Window: 09:00–17:00
-- Day Completed: Yes
-
-### Time Blocks
-
-- 09:00–09:30 | ✅ Done | Reviewed system design notes
-- 09:30–10:00 | ❌ Skipped | Did not work in this period
-```
-
-## Keyboard Shortcuts
-
-| Key   | Action                       |
-| ----- | ---------------------------- |
-| ↑/↓   | Navigate between time blocks |
-| Enter | Toggle block completion      |
-| Tab   | Move to next input field     |
-
-## Environment Variables
-
-| Variable       | Description          | Required | Default                |
-| -------------- | -------------------- | -------- | ---------------------- |
-| `DATABASE_URL` | SQLite database path | Yes      | `file:./prisma/dev.db` |
-
-## Development
-
-```bash
-# Run development server (port 3000)
-npm run dev
-
-# Type checking
-npm run lint
-
-# Build for production
-npm run build
-
-# Start production server
-npm run start
-```
-
-## Ports
-
-| Mode   | Port | URL                   |
-| ------ | ---- | --------------------- |
-| Dev    | 3000 | http://localhost:3000 |
-| Docker | 3001 | http://localhost:3001 |
-
-## License
-
-MIT
+_Made with ❤️ by [Your Name]_
