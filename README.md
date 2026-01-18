@@ -2,8 +2,6 @@
 
 > A simple, distraction-free tool to track your day in 30-minute blocks.
 
-![Productivity Tracker Demo](https://placehold.co/600x400/202020/white?text=Productivity+Tracker+Demo)
-
 ## Why this exists
 
 I realized that tracking every single minute is exhausting. Instead, I just want to know: **"Was this half-hour productive?"**
@@ -68,4 +66,4 @@ This app is ready for:
 
 ---
 
-_Made with ❤️ by [Your Name]_
+_Made with ❤️ by Shishir Shetty_
