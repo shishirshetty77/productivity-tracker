@@ -1,52 +1,89 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Day } from '@/types';
 import { generateTimeBlocks, formatTime, getTodayDate } from '@/lib/utils';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import DayCard from '@/components/DayCard';
 import Link from 'next/link';
-import { logout } from '@/app/actions/logout';
 
-interface DashboardProps {
-  user: {
-    id: string;
-    name?: string | null;
-    role: string;
-  };
+interface User {
+  id: string;
+  username: string;
+  role: string;
 }
 
-export default function Dashboard({ user }: DashboardProps) {
+export default function Dashboard() {
+  const [user, setUser] = useState<User | null>(null);
+  const [loadingUser, setLoadingUser] = useState(true);
+  
   const [days, setDays] = useState<Day[]>([]);
   const [expandedDayId, setExpandedDayId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error' | null>(null);
   const [showNewDayModal, setShowNewDayModal] = useState(false);
 
+  // Login State
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [authError, setAuthError] = useState('');
+
   useEffect(() => {
-    fetchAllDays();
+    fetch('/api/auth/me')
+      .then(res => res.json())
+      .then(data => {
+        if (data.user) {
+            setUser(data.user);
+            fetchAllDays();
+        }
+        setLoadingUser(false);
+      });
   }, []);
 
-  useEffect(() => {
-    if (!isLoading && days.length >= 0) {
-      const today = getTodayDate();
-      const todayExists = days.some(d => d.date === today);
-      if (!todayExists) {
-        createDay(today);
-      }
-    }
-  }, [isLoading, days]);
-
   const fetchAllDays = async () => {
+    setIsLoading(true);
     try {
       const res = await fetch('/api/days');
-      const data: Day[] = await res.json();
-      setDays(data.sort((a, b) => b.date.localeCompare(a.date)));
+      if (res.ok) {
+        const data: Day[] = await res.json();
+        setDays(data.sort((a, b) => b.date.localeCompare(a.date)));
+      }
     } catch (error) {
       console.error('Failed to fetch days:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    const endpoint = isRegistering ? '/api/auth/register' : '/api/auth/login';
+    
+    try {
+        const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+            setUser(data.user);
+            fetchAllDays();
+        } else {
+            setAuthError(data.error || 'Authentication failed');
+        }
+    } catch (err) {
+        setAuthError('Something went wrong');
+    }
+  };
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    setUser(null);
+    setDays([]);
   };
 
   const createDay = async (date: string, startTime: string = '09:00', endTime: string = '22:00') => {
@@ -65,7 +102,7 @@ export default function Dashboard({ user }: DashboardProps) {
       console.error('Failed to create day:', error);
     }
   };
-
+  
   const saveTimeBlock = useCallback(async (data: { id: string; done?: boolean; activity?: string }) => {
     setSaveStatus('saving');
     try {
@@ -81,8 +118,8 @@ export default function Dashboard({ user }: DashboardProps) {
         setSaveStatus('error');
       }
     } catch (error) {
-      console.error('Failed to save:', error);
-      setSaveStatus('error');
+       console.error('Failed to save:', error);
+       setSaveStatus('error');
     }
   }, []);
 
@@ -141,9 +178,66 @@ export default function Dashboard({ user }: DashboardProps) {
     document.body.removeChild(a);
   };
 
+  if (loadingUser) {
+    return (
+        <div className="min-h-screen bg-[#191919] flex items-center justify-center">
+            <div className="w-8 h-8 border-2 border-[#444] border-t-[#2383e2] rounded-full animate-spin" />
+        </div>
+    );
+  }
+
+  if (!user) {
+    return (
+        <div className="min-h-screen bg-[#191919] flex items-center justify-center px-4">
+            <div className="w-full max-w-sm bg-[#202020] p-8 rounded-2xl border border-[#333] shadow-2xl">
+                <h1 className="text-2xl font-bold text-white mb-2 text-center">Welcome Back</h1>
+                <p className="text-[#888] text-center mb-6 text-sm">Sign in to track your productivity</p>
+                
+                <form onSubmit={handleAuth} className="space-y-4">
+                    <div>
+                        <label className="block text-xs text-[#666] mb-1.5 uppercase font-medium">Username</label>
+                        <input 
+                            type="text" 
+                            value={username}
+                            onChange={e => setUsername(e.target.value)}
+                            className="w-full bg-[#151515] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:border-[#2383e2] focus:outline-none transition-colors"
+                            placeholder="Enter username"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs text-[#666] mb-1.5 uppercase font-medium">Password</label>
+                        <input 
+                            type="password" 
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            className="w-full bg-[#151515] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:border-[#2383e2] focus:outline-none transition-colors"
+                            placeholder="Enter password"
+                        />
+                    </div>
+                    
+                    {authError && <p className="text-red-400 text-sm">{authError}</p>}
+                    
+                    <button type="submit" className="w-full bg-[#2383e2] hover:bg-[#1a6cb8] text-white py-2.5 rounded-lg font-medium transition-colors">
+                        {isRegistering ? 'Create Account' : 'Sign In'}
+                    </button>
+                    
+                    <div className="text-center mt-4">
+                        <button 
+                            type="button"
+                            onClick={() => { setIsRegistering(!isRegistering); setAuthError(''); }}
+                            className="text-xs text-[#888] hover:text-white transition-colors"
+                        >
+                            {isRegistering ? 'Already have an account? Sign In' : "Don't have an account? Create one"}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-[#191919]">
-      {/* Header */}
       <header className="fixed top-0 left-0 right-0 h-14 bg-[#202020]/80 backdrop-blur-md border-b border-[#333] z-50 transition-all duration-300">
         <div className="max-w-3xl mx-auto h-full px-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -164,12 +258,10 @@ export default function Dashboard({ user }: DashboardProps) {
               {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : saveStatus === 'error' ? 'Error saving' : ''}
             </span>
             <div className="h-4 w-[1px] bg-[#333]" />
-            <span className="text-xs text-[#888]">{user.name}</span>
-            <form action={logout}>
-                <button type="submit" className="text-xs bg-[#2a2a2a] hover:bg-[#333] text-[#aaa] px-3 py-1.5 rounded transition-all">
-                    Sign Out
-                </button>
-            </form>
+            <span className="text-xs text-[#888]">{user.username}</span>
+            <button onClick={handleLogout} className="text-xs bg-[#2a2a2a] hover:bg-[#333] text-[#aaa] px-3 py-1.5 rounded transition-all">
+                Sign Out
+            </button>
           </div>
         </div>
       </header>
@@ -186,7 +278,7 @@ export default function Dashboard({ user }: DashboardProps) {
         />
       )}
 
-      <div className="max-w-3xl mx-auto px-4 py-6">
+      <div className="max-w-3xl mx-auto px-4 py-6 pt-20">
         <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-white">Your Days</h2>
             <div className="flex gap-2">
@@ -232,7 +324,7 @@ export default function Dashboard({ user }: DashboardProps) {
   );
 }
 
-// New Day Modal Component
+// New Day Modal Component (Unchanged)
 function NewDayModal({ 
   onClose, 
   onCreate, 
@@ -254,7 +346,6 @@ function NewDayModal({
         <h2 className="text-lg font-semibold text-white mb-4">Create New Day</h2>
         
         <div className="space-y-4">
-          {/* Date Picker */}
           <div>
             <label className="block text-sm text-[#aaa] mb-2">Select Date</label>
             <input
@@ -268,7 +359,6 @@ function NewDayModal({
             )}
           </div>
 
-          {/* Time Frame */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-[#aaa] mb-2">Start Time</label>
@@ -293,7 +383,6 @@ function NewDayModal({
             <p className="text-xs text-red-400">End time must be after start time</p>
           )}
 
-          {/* Quick Date Buttons */}
           <div className="flex gap-2">
             <button
               onClick={() => setSelectedDate(getTodayDate())}
@@ -324,7 +413,6 @@ function NewDayModal({
           </div>
         </div>
 
-        {/* Actions */}
         <div className="flex justify-end gap-3 mt-6">
           <button
             onClick={onClose}
@@ -344,4 +432,3 @@ function NewDayModal({
     </div>
   );
 }
-

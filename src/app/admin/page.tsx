@@ -1,11 +1,11 @@
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/auth';
+import { getSession } from '@/lib/session';
 import { redirect } from 'next/navigation';
 
 export default async function AdminDashboard() {
-  const session = await auth();
+  const session = await getSession();
 
-  if (!session || session.user.role !== 'ADMIN') {
+  if (!session || session.role !== 'ADMIN') {
     redirect('/');
   }
 

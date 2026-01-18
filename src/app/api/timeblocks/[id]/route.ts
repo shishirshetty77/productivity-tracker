@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/auth';
+import { getSession } from '@/lib/session';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -8,8 +8,8 @@ interface RouteParams {
 
 // PUT /api/timeblocks/[id] - Update a time block
 export async function PUT(request: NextRequest, { params }: RouteParams) {
-  const session = await auth();
-  if (!session || !session.user) {
+  const session = await getSession();
+  if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -23,7 +23,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       where: { 
         id,
         day: {
-            userId: session.user.id
+            userId: session.userId
         }
       },
     });

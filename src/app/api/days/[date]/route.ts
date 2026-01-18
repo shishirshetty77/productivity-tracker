@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateTimeBlocks } from '@/lib/utils';
-import { auth } from '@/auth';
+import { getSession } from '@/lib/session';
 
 interface RouteParams {
   params: Promise<{ date: string }>;
@@ -9,8 +9,8 @@ interface RouteParams {
 
 // GET /api/days/[date] - Get a specific day
 export async function GET(request: NextRequest, { params }: RouteParams) {
-  const session = await auth();
-  if (!session || !session.user) {
+  const session = await getSession();
+  if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const day = await prisma.day.findFirst({
       where: { 
         date,
-        userId: session.user.id 
+        userId: session.userId 
       },
       include: {
         timeBlocks: {
@@ -43,8 +43,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 // PUT /api/days/[date] - Update a day
 export async function PUT(request: NextRequest, { params }: RouteParams) {
-  const session = await auth();
-  if (!session || !session.user) {
+  const session = await getSession();
+  if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -56,7 +56,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const existingDay = await prisma.day.findFirst({
       where: { 
         date,
-        userId: session.user.id 
+        userId: session.userId 
       },
       include: { timeBlocks: true },
     });
@@ -125,8 +125,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
 // DELETE /api/days/[date] - Delete a day
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
-  const session = await auth();
-  if (!session || !session.user) {
+  const session = await getSession();
+  if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -136,7 +136,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const existingDay = await prisma.day.findFirst({
       where: { 
         date,
-        userId: session.user.id 
+        userId: session.userId 
       },
     });
 

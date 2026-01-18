@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateTimeBlocks } from '@/lib/utils';
-import { auth } from '@/auth';
+import { getSession } from '@/lib/session';
 
 // GET /api/days - Get all days for the logged-in user
 export async function GET() {
-  const session = await auth();
-  if (!session || !session.user) {
+  const session = await getSession();
+  if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
     const days = await prisma.day.findMany({
       where: {
-        userId: session.user.id
+        userId: session.userId
       },
       include: {
         timeBlocks: {
@@ -31,8 +31,8 @@ export async function GET() {
 
 // POST /api/days - Create a new day with time blocks
 export async function POST(request: NextRequest) {
-  const session = await auth();
-  if (!session || !session.user) {
+  const session = await getSession();
+  if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     const existingDay = await prisma.day.findFirst({
       where: { 
         date,
-        userId: session.user.id 
+        userId: session.userId 
       },
     });
 
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
         date,
         startTime,
         endTime,
-        userId: session.user.id,
+        userId: session.userId,
         timeBlocks: {
           create: blocks.map((block) => ({
             startTime: block.startTime,
