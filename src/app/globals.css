@@ -6,16 +6,61 @@
 
 /* Notion-style color scheme */
 :root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f7f7f5;
+  --bg-tertiary: #ebebeb;
+  --bg-overlay: rgba(255, 255, 255, 0.8);
+  --text-primary: #37352f;
+  --text-secondary: rgba(55, 53, 47, 0.65);
+  --text-placeholder: rgba(55, 53, 47, 0.3);
+  --border-primary: rgba(55, 53, 47, 0.16);
+  --accent-blue: #2383e2;
+  --accent-hover: #1a6cb8;
+  --card-hover: #f1f1ef;
+  --block-completed-bg: rgba(46, 170, 110, 0.08);
+  --block-completed-border: rgba(46, 170, 110, 0.3);
+  --block-skipped-bg: rgba(235, 87, 87, 0.08);
+  --block-skipped-border: rgba(235, 87, 87, 0.3);
+
+  --scrollbar-thumb: #d3d1cb;
+  --scrollbar-hover: #aeaca6;
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --bg-primary: #191919;
+  --bg-secondary: #202020;
+  --bg-tertiary: #2a2a2a;
+  --bg-overlay: rgba(32, 32, 32, 0.8);
+  --text-primary: rgba(255, 255, 255, 0.81);
+  --text-secondary: #888888;
+  --text-placeholder: rgba(255, 255, 255, 0.13);
+  --border-primary: #333333;
+  --accent-blue: #2383e2;
+  --accent-hover: #1a6cb8;
+  --card-hover: #252525;
+  --block-completed-bg: rgba(46, 170, 110, 0.08);
+  --block-completed-border: rgba(46, 170, 110, 0.3);
+  --block-skipped-bg: rgba(235, 87, 87, 0.08);
+  --block-skipped-border: rgba(235, 87, 87, 0.3);
+
+  --scrollbar-thumb: #373737;
+  --scrollbar-hover: #4a4a4a;
+
   color-scheme: dark;
 }
 
-/* Base styles - Notion dark theme */
+/* Base styles */
 body {
-  background-color: #191919;
-  color: rgba(255, 255, 255, 0.81);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
-/* Custom scrollbar - Notion style */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -26,30 +71,30 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #373737;
+  background: var(--scrollbar-thumb);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #4a4a4a;
+  background: var(--scrollbar-hover);
 }
 
 /* Focus visible styles */
 :focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.2);
+  outline: 2px solid var(--accent-blue);
   outline-offset: 2px;
 }
 
 /* Selection colors */
 ::selection {
-  background-color: rgba(45, 170, 219, 0.3);
-  color: white;
+  background-color: rgba(35, 131, 226, 0.3);
+  color: var(--text-primary);
 }
 
 /* Input placeholder colors */
 input::placeholder,
 textarea::placeholder {
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--text-placeholder);
 }
 
 /* Auto-expanding textarea */
@@ -65,7 +110,7 @@ textarea::placeholder {
 }
 
 .day-card:hover {
-  background-color: #252525;
+  background-color: var(--card-hover);
 }
 
 /* Smooth expand animation */
@@ -86,19 +131,19 @@ textarea::placeholder {
 
 /* Notion accent - subtle gray-blue */
 .accent-notion {
-  background-color: #2383e2;
+  background-color: var(--accent-blue);
 }
 
-/* Completed block style - green tint */
+/* Completed block style */
 .block-completed {
-  background: rgba(46, 170, 110, 0.08);
-  border-color: rgba(46, 170, 110, 0.3);
+  background: var(--block-completed-bg);
+  border-color: var(--block-completed-border);
 }
 
-/* Skipped block style - red tint */
+/* Skipped block style */
 .block-skipped {
-  background: rgba(235, 87, 87, 0.08);
-  border-color: rgba(235, 87, 87, 0.3);
+  background: var(--block-skipped-bg);
+  border-color: var(--block-skipped-border);
 }
 
 /* Time badge */
@@ -112,7 +157,7 @@ textarea::placeholder {
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="time"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
-  filter: invert(0.7);
+  filter: invert(0.5); /* Adaptive filter */
 }
 
 /* Editable title */
@@ -121,11 +166,11 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   border: none;
   outline: none;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text-primary);
 }
 
 .editable-title:focus {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-secondary);
   border-radius: 4px;
   padding: 2px 6px;
   margin: -2px -6px;
