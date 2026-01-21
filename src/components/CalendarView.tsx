@@ -67,7 +67,7 @@ export default function CalendarView({ days, onSelectDay }: CalendarViewProps) {
       </div>
 
       <div className="grid grid-cols-7 bg-[var(--bg-tertiary)] gap-[1px]">
-        {calendarDays.map((day, _dayIdx) => {
+        {calendarDays.map((day) => {
           const formattedDate = format(day, 'yyyy-MM-dd');
           const dayData = days.find(d => d.date === formattedDate);
           const isToday = isSameDay(day, new Date());

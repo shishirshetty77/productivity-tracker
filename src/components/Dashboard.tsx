@@ -620,7 +620,7 @@ function calculateSleepDuration(sleepTime: string, wakeTime: string): number | n
   const [sleepH, sleepM] = sleepTime.split(':').map(Number);
   const [wakeH, wakeM] = wakeTime.split(':').map(Number);
   
-  let sleepMinutes = sleepH * 60 + sleepM;
+  const sleepMinutes = sleepH * 60 + sleepM;
   let wakeMinutes = wakeH * 60 + wakeM;
   
   // If wake time is earlier than sleep time, assume next day
