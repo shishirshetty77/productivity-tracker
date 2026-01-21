@@ -9,7 +9,40 @@ import CalendarView from '@/components/CalendarView';
 import FocusMode from '@/components/FocusMode';
 import Link from 'next/link';
 import { DndContext, DragEndEvent, useSensor, useSensors, PointerSensor, TouchSensor } from '@dnd-kit/core';
-import { Calendar, List, Focus } from 'lucide-react'; // Import icons
+import { Calendar, List, Focus, Clock } from 'lucide-react';
+
+// Live Clock Component
+function LiveClock() {
+  const [time, setTime] = useState<string>('');
+
+  useEffect(() => {
+    // Set initial time immediately
+    const updateTime = () => {
+      const now = new Date();
+      setTime(now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }));
+    };
+    
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (!time) return null;
+
+  return (
+    <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-[var(--bg-tertiary)] rounded-lg">
+      <Clock size={14} className="text-[var(--text-secondary)]" />
+      <span className="text-xs font-mono text-[var(--text-primary)] tabular-nums">
+        {time}
+      </span>
+    </div>
+  );
+}
 
 interface User {
   id: string;
@@ -431,6 +464,8 @@ export default function Dashboard() {
             >
                 <Focus size={18} />
             </button>
+
+            <LiveClock />
 
             <div className="h-4 w-[1px] bg-[var(--border-primary)] hidden sm:block" />
             

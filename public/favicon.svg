@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C084FC"/>
+      <stop offset="50%" stop-color="#A855F7"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Rounded square background -->
+  <rect width="512" height="512" rx="96" fill="#18181B"/>
+  
+  <!-- F vertical bar -->
+  <rect x="100" y="80" width="60" height="352" rx="30" fill="url(#grad)"/>
+  
+  <!-- F top bar -->
+  <rect x="100" y="80" width="200" height="60" rx="30" fill="url(#grad)"/>
+  
+  <!-- Clean infinity symbol ∞ positioned as middle bar -->
+  <g fill="none" stroke="url(#grad)" stroke-width="56" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Left loop -->
+    <ellipse cx="248" cy="272" rx="72" ry="56"/>
+    <!-- Right loop -->
+    <ellipse cx="368" cy="272" rx="72" ry="56"/>
+  </g>
+  
+  <!-- Connection piece from F to infinity -->
+  <rect x="130" y="244" width="50" height="56" fill="url(#grad)"/>
+</svg>

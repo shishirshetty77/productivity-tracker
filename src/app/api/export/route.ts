@@ -1,13 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getSession } from '@/lib/session';
 
 // GET /api/export - Export all data in JSON or Markdown format
 export async function GET(request: NextRequest) {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const format = searchParams.get('format') || 'json';
 
     const days = await prisma.day.findMany({
+      where: {
+        userId: session.userId as string
+      },
       include: {
         timeBlocks: {
           orderBy: { startTime: 'asc' },
@@ -26,15 +35,23 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // JSON format (LLM-friendly structure)
+    // JSON format (LLM-friendly structure) - includes ALL data
     const jsonData = days.map((day) => ({
       date: day.date,
       day_window: `${day.startTime}-${day.endTime}`,
       completed: day.completed,
+      // Sleep tracking data
+      sleep: {
+        bedTime: day.sleepTime || null,
+        wakeTime: day.wakeTime || null,
+        duration: day.sleepDuration || null,
+        quality: day.sleepQuality || null,
+      },
       intervals: day.timeBlocks.map((block) => ({
         start: block.startTime,
         end: block.endTime,
         done: block.done,
+        skipped: block.skipped,
         activity: block.activity,
       })),
     }));
@@ -56,10 +73,15 @@ interface DayWithBlocks {
   startTime: string;
   endTime: string;
   completed: boolean;
+  sleepTime: string | null;
+  wakeTime: string | null;
+  sleepDuration: number | null;
+  sleepQuality: string | null;
   timeBlocks: {
     startTime: string;
     endTime: string;
     done: boolean;
+    skipped: boolean;
     activity: string;
   }[];
 }
@@ -70,11 +92,21 @@ function generateMarkdown(days: DayWithBlocks[]): string {
   for (const day of days) {
     markdown += `## Date: ${day.date}\n\n`;
     markdown += `- Day Window: ${day.startTime}–${day.endTime}\n`;
-    markdown += `- Day Completed: ${day.completed ? 'Yes' : 'No'}\n\n`;
-    markdown += '### Time Blocks\n\n';
+    markdown += `- Day Completed: ${day.completed ? 'Yes' : 'No'}\n`;
+    
+    // Sleep data
+    if (day.sleepTime || day.wakeTime || day.sleepDuration || day.sleepQuality) {
+      markdown += `\n### 😴 Sleep Data\n\n`;
+      if (day.sleepTime) markdown += `- Bedtime: ${day.sleepTime}\n`;
+      if (day.wakeTime) markdown += `- Wake Time: ${day.wakeTime}\n`;
+      if (day.sleepDuration) markdown += `- Duration: ${day.sleepDuration} hours\n`;
+      if (day.sleepQuality) markdown += `- Quality: ${day.sleepQuality}\n`;
+    }
+    
+    markdown += `\n### Time Blocks\n\n`;
 
     for (const block of day.timeBlocks) {
-      const status = block.done ? '✅ Done' : '⬜ Pending';
+      const status = block.done ? '✅ Done' : block.skipped ? '⏭️ Skipped' : '⬜ Pending';
       const activity = block.activity || '(no activity logged)';
       markdown += `- ${block.startTime}–${block.endTime} | ${status} | ${activity}\n`;
     }
