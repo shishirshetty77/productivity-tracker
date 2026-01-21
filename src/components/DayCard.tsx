@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Day, TimeBlock } from '@/types';
 import { getTodayDate, calculateCompletionPercentage } from '@/lib/utils';
 import TimeBlockItem from './TimeBlockItem';
@@ -27,6 +27,43 @@ export default function DayCard({
   const [customName, setCustomName] = useState('');
   const [isEditingName, setIsEditingName] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const isToday = day.date === getTodayDate();
+  
+  // Get current time to highlight current block
+  const getCurrentTimeString = () => {
+    const now = new Date();
+    return now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  };
+  const [currentTime, setCurrentTime] = useState(getCurrentTimeString());
+  
+  // Update current time every minute
+  useEffect(() => {
+    if (!isToday) return;
+    const interval = setInterval(() => {
+      setCurrentTime(getCurrentTimeString());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [isToday]);
+  
+  // Find current block index
+  const currentBlockIndex = isToday ? day.timeBlocks.findIndex(block => 
+    currentTime >= block.startTime && currentTime < block.endTime
+  ) : -1;
+  
+  // Auto-scroll to current block when expanded
+  useEffect(() => {
+    if (isExpanded && isToday && currentBlockIndex >= 0 && scrollContainerRef.current) {
+      const blockElement = scrollContainerRef.current.querySelector(
+        `[data-block-index="${currentBlockIndex}"]`
+      );
+      if (blockElement) {
+        setTimeout(() => {
+          blockElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+      }
+    }
+  }, [isExpanded, isToday, currentBlockIndex]);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr + 'T00:00:00');
@@ -124,22 +161,28 @@ export default function DayCard({
       {/* Expanded Content */}
       {isExpanded && (
         <div className="expand-content border-t border-[var(--border-primary)]" ref={containerRef}>
-          <div className="p-5 space-y-2">
+          {/* Scrollable time blocks container */}
+          <div 
+            ref={scrollContainerRef}
+            className="max-h-[400px] overflow-y-auto p-5 space-y-2 scroll-smooth"
+          >
             {day.timeBlocks.map((block, index) => (
-              <TimeBlockItem
-                key={block.id}
-                id={block.id}
-                startTime={block.startTime}
-                endTime={block.endTime}
-                done={block.done}
-                skipped={block.skipped}
-                activity={block.activity}
-                onUpdate={onUpdateBlock}
-                index={index}
-                isFirst={index === 0}
-                isLast={index === day.timeBlocks.length - 1}
-                onNavigate={(direction) => handleNavigate(index, direction)}
-              />
+              <div key={block.id} data-block-index={index}>
+                <TimeBlockItem
+                  id={block.id}
+                  startTime={block.startTime}
+                  endTime={block.endTime}
+                  done={block.done}
+                  skipped={block.skipped}
+                  activity={block.activity}
+                  onUpdate={onUpdateBlock}
+                  index={index}
+                  isFirst={index === 0}
+                  isLast={index === day.timeBlocks.length - 1}
+                  onNavigate={(direction) => handleNavigate(index, direction)}
+                  isCurrent={index === currentBlockIndex}
+                />
+              </div>
             ))}
           </div>
           

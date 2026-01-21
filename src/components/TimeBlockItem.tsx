@@ -12,6 +12,7 @@ interface TimeBlockItemProps {
   index: number;
   isFirst: boolean;
   isLast: boolean;
+  isCurrent?: boolean;
   onUpdate: (id: string, data: { done?: boolean; skipped?: boolean; activity?: string }) => void;
   onNavigate: (direction: 'up' | 'down') => void;
 }
@@ -24,6 +25,7 @@ export default function TimeBlockItem({
   skipped,
   activity,
   index,
+  isCurrent = false,
   onUpdate,
   onNavigate
 }: TimeBlockItemProps) {
@@ -57,7 +59,13 @@ export default function TimeBlockItem({
   return (
     <div 
         className={`group flex items-start gap-3 p-2 rounded-lg transition-all duration-200 ${
-            done ? 'bg-green-900/10' : skipped ? 'bg-gray-800/30' : 'hover:bg-[var(--card-hover)]'
+            isCurrent 
+              ? 'bg-[var(--accent-blue)]/10 border border-[var(--accent-blue)]/30 shadow-[0_0_10px_var(--accent-blue)/20]' 
+              : done 
+                ? 'bg-green-900/10' 
+                : skipped 
+                  ? 'bg-gray-800/30' 
+                  : 'hover:bg-[var(--card-hover)]'
         }`}
     >
       <div className="flex flex-col items-center gap-1 mt-1.5">
