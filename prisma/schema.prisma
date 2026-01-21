@@ -26,6 +26,12 @@ model Day {
   updatedAt   DateTime    @updatedAt
   timeBlocks  TimeBlock[]
   
+  // Sleep tracking fields (all optional)
+  sleepTime     String?   // When went to bed yesterday (HH:MM)
+  wakeTime      String?   // When woke up today (HH:MM)
+  sleepDuration Float?    // Hours of sleep
+  sleepQuality  String?   // GOOD, DEEP, LIGHT, RESTLESS, POOR
+  
   userId      String?     // Optional for migration compatibility, will be required later
   user        User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
