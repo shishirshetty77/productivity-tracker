@@ -319,7 +319,7 @@ export default function FocusMode({ currentBlock, onClose, onComplete }: FocusMo
     let num = parseInt(val) || 0;
     if (num > 48) num = 48;
     setHoursInput(num.toString().padStart(val.length > 0 ? val.length : 1, '0'));
-    if (timerState !== 'RUNNING') setTimerState('READY');
+    if (timerState === 'IDLE' || timerState === 'CANCELLED') setTimerState('READY');
   };
 
   const handleMinutesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -328,7 +328,7 @@ export default function FocusMode({ currentBlock, onClose, onComplete }: FocusMo
     let num = parseInt(val) || 0;
     if (num > 59) num = 59;
     setMinutesInput(num.toString().padStart(val.length > 0 ? val.length : 1, '0'));
-    if (timerState !== 'RUNNING') setTimerState('READY');
+    if (timerState === 'IDLE' || timerState === 'CANCELLED') setTimerState('READY');
   };
 
   const handleSecondsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -337,7 +337,7 @@ export default function FocusMode({ currentBlock, onClose, onComplete }: FocusMo
     let num = parseInt(val) || 0;
     if (num > 59) num = 59;
     setSecondsInput(num.toString().padStart(val.length > 0 ? val.length : 1, '0'));
-    if (timerState !== 'RUNNING') setTimerState('READY');
+    if (timerState === 'IDLE' || timerState === 'CANCELLED') setTimerState('READY');
   };
 
   // Status text
