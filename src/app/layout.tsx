@@ -8,10 +8,67 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
+// Define the base URL
+const baseUrl = "https://focusry.vercel.app/";
+
 export const metadata: Metadata = {
-  title: "Half-Hour Productivity Tracker",
-  description: "Track your daily activities in 30-minute intervals. Build better habits, analyze productivity patterns, and export data for insights.",
-  keywords: ["productivity", "time tracking", "habits", "time blocks", "focus"],
+  metadataBase: new URL(baseUrl),
+  title: {
+    default: "Focusry | 30-Minute Productivity Tracker",
+    template: "%s | Focusry",
+  },
+  description: "Focusry is a productivity tracking app that helps you log your work in focused 30-minute intervals, analyze progress over time, and export insights to improve consistency and performance.",
+  keywords: [
+    "productivity tracker",
+    "time tracking app",
+    "30 minute productivity",
+    "focus tracking",
+    "work interval tracking",
+    "habit tracking",
+    "personal analytics",
+    "productivity analytics",
+    "export productivity data",
+    "developer productivity"
+  ],
+  authors: [{ name: "Shishir Shetty", url: "https://github.com/shishirshetty77/productivity-tracker.git" }],
+  creator: "Shishir Shetty",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: baseUrl,
+    title: "Focusry | Master Your Day in 30-Minute Blocks",
+    description: "Log focused work intervals, analyze progress, and export insights. Build consistency with Focusry.",
+    siteName: "Focusry",
+    images: [
+      {
+        url: "/og-image.png", 
+        width: 1200,
+        height: 630,
+        alt: "Focusry Dashboard",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Focusry | 30-Minute Productivity Tracker",
+    description: "Focusry is a productivity tracking app that helps you log your work in focused 30-minute intervals.",
+    images: ["/og-image.png"],
+    creator: "@shishirshetty07",
+  },
+  icons: {
+    icon: "/favicon.ico",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export const viewport: Viewport = {

@@ -23,7 +23,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       where: { 
         id,
         day: {
-            userId: session.userId
+            userId: session.userId as string
         }
       },
     });

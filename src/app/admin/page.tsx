@@ -19,43 +19,45 @@ export default async function AdminDashboard() {
   });
 
   return (
-    <div className="min-h-screen bg-[#191919] p-8">
+    <div className="min-h-screen bg-[var(--bg-primary)] p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold text-white mb-6">Admin Dashboard</h1>
+        <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-6">Admin Dashboard</h1>
         
-        <div className="bg-[#202020] rounded-xl border border-[#373737] overflow-hidden">
-          <table className="w-full text-left text-sm text-[#ddd]">
-            <thead className="bg-[#2a2a2a] text-[#aaa]">
-              <tr>
-                <th className="px-6 py-3 font-medium">Username</th>
-                <th className="px-6 py-3 font-medium">Role</th>
-                <th className="px-6 py-3 font-medium">Joined</th>
-                <th className="px-6 py-3 font-medium">Days Tracked</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#373737]">
-              {users.map((user) => (
-                <tr key={user.id} className="hover:bg-[#2a2a2a] transition-colors">
-                  <td className="px-6 py-4 font-medium text-white">{user.username}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                        user.role === 'ADMIN' 
-                        ? 'bg-purple-500/20 text-purple-400' 
-                        : 'bg-blue-500/20 text-blue-400'
-                    }`}>
-                        {user.role}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-[#9b9b9b]">
-                    {new Date(user.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 text-[#9b9b9b]">
-                    {user._count.days}
-                  </td>
+        <div className="bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-primary)] overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm text-[var(--text-primary)] min-w-[600px]">
+              <thead className="bg-[var(--bg-tertiary)] text-[var(--text-secondary)]">
+                <tr>
+                  <th className="px-6 py-3 font-medium">Username</th>
+                  <th className="px-6 py-3 font-medium">Role</th>
+                  <th className="px-6 py-3 font-medium">Joined</th>
+                  <th className="px-6 py-3 font-medium">Days Tracked</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-[var(--border-primary)]">
+                {users.map((user) => (
+                  <tr key={user.id} className="hover:bg-[var(--card-hover)] transition-colors">
+                    <td className="px-6 py-4 font-medium text-[var(--text-primary)]">{user.username}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                          user.role === 'ADMIN' 
+                          ? 'bg-purple-500/20 text-purple-400' 
+                          : 'bg-blue-500/20 text-blue-400'
+                      }`}>
+                          {user.role}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-[var(--text-secondary)]">
+                      {new Date(user.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 text-[var(--text-secondary)]">
+                      {user._count.days}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

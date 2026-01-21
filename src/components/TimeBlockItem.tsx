@@ -12,6 +12,7 @@ interface TimeBlockItemProps {
   index: number;
   isFirst: boolean;
   isLast: boolean;
+  isCurrent?: boolean;
   onUpdate: (id: string, data: { done?: boolean; skipped?: boolean; activity?: string }) => void;
   onNavigate: (direction: 'up' | 'down') => void;
 }
@@ -24,6 +25,7 @@ export default function TimeBlockItem({
   skipped,
   activity,
   index,
+  isCurrent = false,
   onUpdate,
   onNavigate
 }: TimeBlockItemProps) {
@@ -56,8 +58,14 @@ export default function TimeBlockItem({
 
   return (
     <div 
-        className={`group flex items-start gap-3 p-2 rounded-lg transition-all duration-200 ${
-            done ? 'bg-green-900/10' : skipped ? 'bg-gray-800/30' : 'hover:bg-[#2a2a2a]'
+        className={`group flex items-start gap-2 sm:gap-3 p-1.5 sm:p-2 rounded-lg transition-all duration-200 ${
+            isCurrent 
+              ? 'bg-[var(--accent-blue)]/10 border border-[var(--accent-blue)]/30 shadow-[0_0_10px_var(--accent-blue)/20]' 
+              : done 
+                ? 'bg-green-900/10' 
+                : skipped 
+                  ? 'bg-gray-800/30' 
+                  : 'hover:bg-[var(--card-hover)]'
         }`}
     >
       <div className="flex flex-col items-center gap-1 mt-1.5">
@@ -66,7 +74,7 @@ export default function TimeBlockItem({
             className={`w-5 h-5 rounded-md border cursor-pointer flex items-center justify-center transition-all duration-200 ${
                 done 
                 ? 'bg-green-500 border-green-500 text-white' 
-                : 'border-[#4a4a4a] hover:border-[#666]'
+                : 'border-[var(--border-primary)] hover:border-[var(--text-secondary)]'
             }`}
           >
             {done && (
@@ -78,7 +86,7 @@ export default function TimeBlockItem({
           
           <button
              onClick={() => onUpdate(id, { skipped: !skipped })}
-             className={`p-1 rounded hover:bg-[#373737] transition-colors ${skipped ? 'text-amber-500' : 'text-[#444] group-hover:text-[#666]'}`}
+             className={`p-1 rounded hover:bg-[var(--bg-tertiary)] transition-colors ${skipped ? 'text-amber-500' : 'text-[var(--text-secondary)]/50 group-hover:text-[var(--text-secondary)]'}`}
              title="Skip block"
           >
              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -88,9 +96,9 @@ export default function TimeBlockItem({
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-baseline justify-between mb-1">
-            <span className={`text-xs font-mono font-medium ${
-                done ? 'text-green-500/80' : skipped ? 'text-gray-500' : 'text-[#888]'
+        <div className="flex items-baseline justify-between mb-0.5 sm:mb-1">
+            <span className={`text-[10px] sm:text-xs font-mono font-medium ${
+                done ? 'text-green-500/80' : skipped ? 'text-gray-500' : 'text-[var(--text-secondary)]'
             }`}>
                 {startTime} - {endTime}
             </span>
@@ -105,7 +113,7 @@ export default function TimeBlockItem({
             rows={1}
             placeholder={skipped ? "Marked as skipped" : "What did you do?"}
             className={`w-full bg-transparent resize-none focus:outline-none text-sm transition-colors decoration-gray-600 ${
-                done ? 'text-[#888] line-through' : skipped ? 'text-gray-600 italic' : 'text-[#ddd] placeholder-[#444]'
+                done ? 'text-[var(--text-secondary)] line-through' : skipped ? 'text-gray-600 italic' : 'text-[var(--text-primary)] placeholder-[var(--text-placeholder)]'
             }`}
         />
       </div>

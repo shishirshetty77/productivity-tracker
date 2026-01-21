@@ -13,7 +13,7 @@ export async function GET() {
   try {
     const days = await prisma.day.findMany({
       where: {
-        userId: session.userId
+        userId: session.userId as string
       },
       include: {
         timeBlocks: {
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     const existingDay = await prisma.day.findFirst({
       where: { 
         date,
-        userId: session.userId 
+        userId: session.userId as string
       },
     });
 
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
         date,
         startTime,
         endTime,
-        userId: session.userId,
+        userId: session.userId as string,
         timeBlocks: {
           create: blocks.map((block) => ({
             startTime: block.startTime,
