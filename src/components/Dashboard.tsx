@@ -276,7 +276,7 @@ export default function Dashboard() {
             {'ACTION'.split('').map((letter, i) => (
               <span 
                 key={i} 
-                className="text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-purple-500/20 to-purple-500/5"
+                className="text-3xl sm:text-5xl font-black text-amber-400/30"
                 style={{ animationDelay: `${i * 0.1}s` }}
               >
                 {letter}
@@ -286,7 +286,7 @@ export default function Dashboard() {
 
           {/* Center - Giant > symbol */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-            <span className="text-[20rem] sm:text-[28rem] font-black text-purple-500/[0.03] leading-none">
+            <span className="text-[20rem] sm:text-[28rem] font-black text-yellow-500/10 leading-none">
               &gt;
             </span>
           </div>
@@ -296,7 +296,7 @@ export default function Dashboard() {
             {'WORDS'.split('').map((letter, i) => (
               <span 
                 key={i} 
-                className="text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-purple-500/10 to-purple-500/5"
+                className="text-3xl sm:text-5xl font-black text-amber-400/20"
                 style={{ animationDelay: `${i * 0.1}s` }}
               >
                 {letter}
