@@ -157,3 +157,68 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   padding: 2px 6px;
   margin: -2px -6px;
 }
+
+/* Login Page Animations */
+@keyframes float-slow {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -30px) scale(1.05); }
+  50% { transform: translate(-20px, 20px) scale(0.95); }
+  75% { transform: translate(40px, 10px) scale(1.02); }
+}
+
+@keyframes float-medium {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-40px, 30px) scale(1.08); }
+  66% { transform: translate(30px, -40px) scale(0.92); }
+}
+
+@keyframes float-fast {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(50px, -30px); }
+}
+
+@keyframes float-reverse {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-60px, 40px) rotate(10deg); }
+}
+
+@keyframes particle-float-1 {
+  0%, 100% { transform: translate(0, 0); opacity: 0.4; }
+  50% { transform: translate(100px, -50px); opacity: 0.8; }
+}
+
+@keyframes particle-float-2 {
+  0%, 100% { transform: translate(0, 0); opacity: 0.3; }
+  50% { transform: translate(-80px, 30px); opacity: 0.6; }
+}
+
+@keyframes particle-float-3 {
+  0%, 100% { transform: translate(0, 0); opacity: 0.3; }
+  50% { transform: translate(60px, 60px); opacity: 0.5; }
+}
+
+@keyframes particle-float-4 {
+  0%, 100% { transform: translate(0, 0); opacity: 0.4; }
+  50% { transform: translate(-40px, -80px); opacity: 0.7; }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-float-slow { animation: float-slow 20s ease-in-out infinite; }
+.animate-float-medium { animation: float-medium 15s ease-in-out infinite; }
+.animate-float-fast { animation: float-fast 10s ease-in-out infinite; }
+.animate-float-reverse { animation: float-reverse 18s ease-in-out infinite; }
+.animate-particle-1 { animation: particle-float-1 12s ease-in-out infinite; }
+.animate-particle-2 { animation: particle-float-2 10s ease-in-out infinite 1s; }
+.animate-particle-3 { animation: particle-float-3 14s ease-in-out infinite 2s; }
+.animate-particle-4 { animation: particle-float-4 11s ease-in-out infinite 0.5s; }
+.animate-fade-in-up { animation: fade-in-up 0.8s ease-out forwards; }

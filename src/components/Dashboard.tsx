@@ -231,50 +231,150 @@ export default function Dashboard() {
 
   if (!user) {
     return (
-        <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center px-4">
-            <div className="w-full max-w-sm bg-[var(--bg-secondary)] p-8 rounded-2xl border border-[var(--border-primary)] shadow-2xl">
-                <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-2 text-center">Welcome Back</h1>
-                <p className="text-[var(--text-secondary)] text-center mb-6 text-sm">Sign in to track your productivity</p>
-                
-                <form onSubmit={handleAuth} className="space-y-4">
+        <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4 overflow-hidden relative">
+          {/* Floating Orbs Background */}
+          <div className="absolute inset-0 overflow-hidden">
+            {/* Orb 1 - Large Blue */}
+            <div 
+              className="absolute w-[500px] h-[500px] rounded-full opacity-30 blur-[100px] animate-float-slow"
+              style={{
+                background: 'radial-gradient(circle, #2383E2 0%, transparent 70%)',
+                top: '-10%',
+                left: '-10%',
+              }}
+            />
+            {/* Orb 2 - Purple */}
+            <div 
+              className="absolute w-[400px] h-[400px] rounded-full opacity-25 blur-[80px] animate-float-medium"
+              style={{
+                background: 'radial-gradient(circle, #9333EA 0%, transparent 70%)',
+                top: '50%',
+                right: '-5%',
+              }}
+            />
+            {/* Orb 3 - Cyan */}
+            <div 
+              className="absolute w-[350px] h-[350px] rounded-full opacity-20 blur-[90px] animate-float-fast"
+              style={{
+                background: 'radial-gradient(circle, #06B6D4 0%, transparent 70%)',
+                bottom: '0%',
+                left: '20%',
+              }}
+            />
+            {/* Orb 4 - Pink */}
+            <div 
+              className="absolute w-[300px] h-[300px] rounded-full opacity-20 blur-[70px] animate-float-reverse"
+              style={{
+                background: 'radial-gradient(circle, #EC4899 0%, transparent 70%)',
+                top: '20%',
+                left: '50%',
+              }}
+            />
+            {/* Small floating particles */}
+            <div className="absolute w-2 h-2 bg-blue-400/40 rounded-full blur-[2px] animate-particle-1" style={{ top: '20%', left: '30%' }} />
+            <div className="absolute w-1.5 h-1.5 bg-purple-400/40 rounded-full blur-[2px] animate-particle-2" style={{ top: '60%', left: '70%' }} />
+            <div className="absolute w-2 h-2 bg-cyan-400/30 rounded-full blur-[2px] animate-particle-3" style={{ top: '80%', left: '20%' }} />
+            <div className="absolute w-1 h-1 bg-pink-400/50 rounded-full blur-[1px] animate-particle-4" style={{ top: '30%', left: '80%' }} />
+          </div>
+
+          {/* Noise overlay for texture */}
+          <div 
+            className="absolute inset-0 opacity-[0.03] pointer-events-none"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+            }}
+          />
+
+          {/* Login Card */}
+          <div className="relative z-10 w-full max-w-md animate-fade-in-up">
+            {/* Glassmorphic Card */}
+            <div className="relative backdrop-blur-xl bg-white/[0.03] border border-white/[0.08] rounded-3xl p-10 shadow-2xl">
+              {/* Subtle glow behind card */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-cyan-500/10 rounded-3xl blur-xl opacity-50" />
+              
+              <div className="relative">
+                {/* Logo/Icon */}
+                <div className="flex justify-center mb-6">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+                    <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Title */}
+                <div className="text-center mb-8">
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-white to-white/60 bg-clip-text text-transparent mb-2">
+                    {isRegistering ? 'Create Account' : 'Welcome Back'}
+                  </h1>
+                  <p className="text-white/40 text-sm">
+                    {isRegistering ? 'Start tracking your productivity today' : 'Sign in to continue your journey'}
+                  </p>
+                </div>
+
+                {/* Form */}
+                <form onSubmit={handleAuth} className="space-y-5">
+                  <div className="space-y-4">
                     <div>
-                        <label className="block text-xs text-[var(--text-secondary)] mb-1.5 uppercase font-medium">Username</label>
-                        <input 
-                            type="text" 
-                            value={username}
-                            onChange={e => setUsername(e.target.value)}
-                            className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-primary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] focus:border-[var(--accent-blue)] focus:outline-none transition-colors"
-                            placeholder="Enter username"
-                        />
+                      <label className="block text-xs text-white/50 mb-2 uppercase tracking-wider font-medium">Username</label>
+                      <input 
+                        type="text" 
+                        value={username}
+                        onChange={e => setUsername(e.target.value)}
+                        className="w-full bg-white/[0.05] border border-white/[0.08] rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:border-blue-500/50 focus:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-300"
+                        placeholder="Enter your username"
+                      />
                     </div>
                     <div>
-                        <label className="block text-xs text-[var(--text-secondary)] mb-1.5 uppercase font-medium">Password</label>
-                        <input 
-                            type="password" 
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-primary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] focus:border-[var(--accent-blue)] focus:outline-none transition-colors"
-                            placeholder="Enter password"
-                        />
+                      <label className="block text-xs text-white/50 mb-2 uppercase tracking-wider font-medium">Password</label>
+                      <input 
+                        type="password" 
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        className="w-full bg-white/[0.05] border border-white/[0.08] rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:border-blue-500/50 focus:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-300"
+                        placeholder="Enter your password"
+                      />
                     </div>
-                    
-                    {authError && <p className="text-red-400 text-sm">{authError}</p>}
-                    
-                    <button type="submit" className="w-full bg-[var(--accent-blue)] hover:bg-[var(--accent-hover)] text-white py-2.5 rounded-lg font-medium transition-colors">
-                        {isRegistering ? 'Create Account' : 'Sign In'}
+                  </div>
+                  
+                  {authError && (
+                    <div className="flex items-center gap-2 text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {authError}
+                    </div>
+                  )}
+                  
+                  <button 
+                    type="submit" 
+                    className="w-full relative group overflow-hidden rounded-xl py-3.5 font-semibold text-white transition-all duration-300"
+                  >
+                    {/* Button gradient background */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 transition-all duration-300 group-hover:scale-105" />
+                    {/* Shimmer effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                    <span className="relative z-10">{isRegistering ? 'Create Account' : 'Sign In'}</span>
+                  </button>
+                  
+                  <div className="text-center pt-2">
+                    <button 
+                      type="button"
+                      onClick={() => { setIsRegistering(!isRegistering); setAuthError(''); }}
+                      className="text-sm text-white/40 hover:text-white/70 transition-colors duration-300"
+                    >
+                      {isRegistering ? 'Already have an account? Sign In' : "Don't have an account? Create one"}
                     </button>
-                    
-                    <div className="text-center mt-4">
-                        <button 
-                            type="button"
-                            onClick={() => { setIsRegistering(!isRegistering); setAuthError(''); }}
-                            className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-                        >
-                            {isRegistering ? 'Already have an account? Sign In' : "Don't have an account? Create one"}
-                        </button>
-                    </div>
+                  </div>
                 </form>
+              </div>
             </div>
+            
+            {/* Bottom tagline */}
+            <p className="text-center text-white/20 text-xs mt-6">
+              Track every 30 minutes. Master your day.
+            </p>
+          </div>
         </div>
     );
   }
