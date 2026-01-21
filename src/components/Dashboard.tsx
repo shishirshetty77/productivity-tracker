@@ -270,6 +270,40 @@ export default function Dashboard() {
   if (!user) {
     return (
         <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4 overflow-hidden relative">
+          {/* ACTION > WORDS - Split Vertical Text */}
+          {/* Left side - ACTION */}
+          <div className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 flex flex-col gap-3 select-none pointer-events-none">
+            {'ACTION'.split('').map((letter, i) => (
+              <span 
+                key={i} 
+                className="text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-purple-500/20 to-purple-500/5"
+                style={{ animationDelay: `${i * 0.1}s` }}
+              >
+                {letter}
+              </span>
+            ))}
+          </div>
+
+          {/* Center - Giant > symbol */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+            <span className="text-[20rem] sm:text-[28rem] font-black text-purple-500/[0.03] leading-none">
+              &gt;
+            </span>
+          </div>
+
+          {/* Right side - WORDS */}
+          <div className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 flex flex-col gap-3 select-none pointer-events-none">
+            {'WORDS'.split('').map((letter, i) => (
+              <span 
+                key={i} 
+                className="text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-purple-500/10 to-purple-500/5"
+                style={{ animationDelay: `${i * 0.1}s` }}
+              >
+                {letter}
+              </span>
+            ))}
+          </div>
+
           {/* Floating Orbs Background */}
           <div className="absolute inset-0 overflow-hidden">
             {/* Orb 1 - Large Blue */}
@@ -331,12 +365,10 @@ export default function Dashboard() {
               <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-cyan-500/10 rounded-3xl blur-xl opacity-50" />
               
               <div className="relative">
-                {/* Logo/Icon */}
+                {/* Logo/Icon - F∞ inspired */}
                 <div className="flex justify-center mb-6">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
-                    <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center shadow-lg shadow-purple-500/25">
+                    <span className="text-2xl font-black text-white">F∞</span>
                   </div>
                 </div>
 
@@ -465,8 +497,6 @@ export default function Dashboard() {
                 <Focus size={18} />
             </button>
 
-            <LiveClock />
-
             <div className="h-4 w-[1px] bg-[var(--border-primary)] hidden sm:block" />
             
             <div className="flex items-center gap-2">
@@ -513,7 +543,10 @@ export default function Dashboard() {
 
       <div className="max-w-3xl mx-auto px-4 py-6 pt-20">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h2 className="text-xl font-bold text-[var(--text-primary)]">Your Days</h2>
+            <div className="flex items-center gap-4">
+              <h2 className="text-xl font-bold text-[var(--text-primary)]">Your Days</h2>
+              <LiveClock />
+            </div>
             <div className="flex gap-2 w-full sm:w-auto">
                 <button
                   onClick={() => handleExport('json')}
