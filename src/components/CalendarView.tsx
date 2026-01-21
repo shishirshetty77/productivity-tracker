@@ -60,8 +60,8 @@ export default function CalendarView({ days, onSelectDay }: CalendarViewProps) {
 
       <div className="grid grid-cols-7 bg-[var(--bg-tertiary)] border-b border-[var(--border-primary)]">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-          <div key={day} className="py-2 text-center text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-            {day}
+          <div key={day} className="py-2 text-center text-[10px] sm:text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+            {day.slice(0, 3)}
           </div>
         ))}
       </div>
@@ -83,14 +83,14 @@ export default function CalendarView({ days, onSelectDay }: CalendarViewProps) {
               key={day.toString()}
               onClick={() => onSelectDay(formattedDate)}
               className={clsx(
-                "min-h-[100px] bg-[var(--bg-primary)] p-2 cursor-pointer transition-colors hover:bg-[var(--card-hover)] flex flex-col justify-between",
+                "min-h-[60px] sm:min-h-[100px] bg-[var(--bg-primary)] p-1 sm:p-2 cursor-pointer transition-colors hover:bg-[var(--card-hover)] flex flex-col justify-between",
                 !isCurrentMonth && "opacity-50 bg-[var(--bg-secondary)]"
               )}
             >
               <div className="flex justify-between items-start">
                 <span 
                   className={clsx(
-                    "text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full",
+                    "text-xs sm:text-sm font-medium w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-full",
                     isToday 
                       ? "bg-[var(--accent-blue)] text-white" 
                       : "text-[var(--text-secondary)]"
@@ -99,22 +99,26 @@ export default function CalendarView({ days, onSelectDay }: CalendarViewProps) {
                   {format(day, 'd')}
                 </span>
                 {dayData?.completed && (
-                   <CheckCircle2 size={16} className="text-green-500" />
+                   <CheckCircle2 size={14} className="text-green-500 hidden sm:block" />
+                )}
+                {/* Mobile dot indicatorfor completion */}
+                {dayData?.completed && (
+                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full sm:hidden" />
                 )}
               </div>
 
               {dayData && (
-                <div className="mt-2 space-y-1">
+                <div className="mt-1 sm:mt-2 space-y-1">
                   {/* Progress Bar */}
-                  <div className="w-full h-1.5 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
+                  <div className="w-full h-1 sm:h-1.5 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
                     <div 
                       className="h-full bg-[var(--accent-blue)] rounded-full transition-all duration-500"
                       style={{ width: `${percentage}%` }}
                     />
                   </div>
                   
-                  {/* Stats */}
-                  <div className="text-[10px] text-[var(--text-secondary)] flex justify-between">
+                  {/* Stats - Hidden on mobile, visible on sm+ */}
+                  <div className="hidden sm:flex text-[10px] text-[var(--text-secondary)] justify-between">
                     <span>{percentage}%</span>
                     <span>{completedBlocks}/{totalBlocks}</span>
                   </div>

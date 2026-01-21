@@ -58,7 +58,7 @@ export default function TimeBlockItem({
 
   return (
     <div 
-        className={`group flex items-start gap-3 p-2 rounded-lg transition-all duration-200 ${
+        className={`group flex items-start gap-2 sm:gap-3 p-1.5 sm:p-2 rounded-lg transition-all duration-200 ${
             isCurrent 
               ? 'bg-[var(--accent-blue)]/10 border border-[var(--accent-blue)]/30 shadow-[0_0_10px_var(--accent-blue)/20]' 
               : done 
@@ -96,8 +96,8 @@ export default function TimeBlockItem({
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-baseline justify-between mb-1">
-            <span className={`text-xs font-mono font-medium ${
+        <div className="flex items-baseline justify-between mb-0.5 sm:mb-1">
+            <span className={`text-[10px] sm:text-xs font-mono font-medium ${
                 done ? 'text-green-500/80' : skipped ? 'text-gray-500' : 'text-[var(--text-secondary)]'
             }`}>
                 {startTime} - {endTime}

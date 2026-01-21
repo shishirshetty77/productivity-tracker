@@ -421,11 +421,11 @@ export default function FocusMode({ currentBlock, onClose, onComplete }: FocusMo
                  />
              </svg>
 
-             {/* Inputs */}
-             <div className="flex items-end gap-4 md:gap-8 z-50 px-8 relative">
+             {/* Small/Mobile Timer Display (Stacked or scaled) */}
+             <div className="flex items-end gap-2 md:gap-8 z-50 px-4 md:px-8 relative w-full justify-center">
                  
                  {/* Hours */}
-                 <div className="flex flex-col items-center gap-2">
+                 <div className="flex flex-col items-center gap-1 md:gap-2">
                     <input
                         type="text"
                         inputMode="numeric"
@@ -434,17 +434,17 @@ export default function FocusMode({ currentBlock, onClose, onComplete }: FocusMo
                         onBlur={handleInputBlur}
                         disabled={inputsDisabled}
                         className={clsx(
-                            "w-24 md:w-40 text-center bg-transparent text-7xl md:text-9xl font-light tracking-tighter text-white focus:outline-none focus:bg-white/5 rounded-xl transition-all",
+                            "w-16 sm:w-20 md:w-32 lg:w-40 text-center bg-transparent text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-light tracking-tighter text-white focus:outline-none focus:bg-white/5 rounded-xl transition-all p-0",
                             inputsDisabled ? "cursor-default select-none opacity-80" : "cursor-text hover:bg-white/5"
                         )}
                     />
-                    <span className="text-sm md:text-base font-semibold text-zinc-400 uppercase tracking-widest">hr</span>
+                    <span className="text-xs md:text-sm lg:text-base font-semibold text-zinc-400 uppercase tracking-widest">hr</span>
                  </div>
                  
-                 <span className="text-7xl md:text-9xl font-light text-zinc-600 pb-8 md:pb-10">:</span>
+                 <span className="text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-light text-zinc-600 pb-3 md:pb-6 lg:pb-10">:</span>
 
                  {/* Minutes */}
-                 <div className="flex flex-col items-center gap-2">
+                 <div className="flex flex-col items-center gap-1 md:gap-2">
                     <input
                         type="text"
                         inputMode="numeric"
@@ -453,17 +453,17 @@ export default function FocusMode({ currentBlock, onClose, onComplete }: FocusMo
                         onBlur={handleInputBlur}
                         disabled={inputsDisabled}
                         className={clsx(
-                            "w-24 md:w-40 text-center bg-transparent text-7xl md:text-9xl font-light tracking-tighter text-white focus:outline-none focus:bg-white/5 rounded-xl transition-all",
+                            "w-16 sm:w-20 md:w-32 lg:w-40 text-center bg-transparent text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-light tracking-tighter text-white focus:outline-none focus:bg-white/5 rounded-xl transition-all p-0",
                             inputsDisabled ? "cursor-default select-none opacity-80" : "cursor-text hover:bg-white/5"
                         )}
                     />
-                    <span className="text-sm md:text-base font-semibold text-zinc-400 uppercase tracking-widest">min</span>
+                    <span className="text-xs md:text-sm lg:text-base font-semibold text-zinc-400 uppercase tracking-widest">min</span>
                  </div>
 
-                 <span className="text-7xl md:text-9xl font-light text-zinc-600 pb-8 md:pb-10">:</span>
+                 <span className="text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-light text-zinc-600 pb-3 md:pb-6 lg:pb-10">:</span>
 
                  {/* Seconds */}
-                 <div className="flex flex-col items-center gap-2">
+                 <div className="flex flex-col items-center gap-1 md:gap-2">
                     <input
                         type="text"
                         inputMode="numeric"
@@ -472,13 +472,12 @@ export default function FocusMode({ currentBlock, onClose, onComplete }: FocusMo
                         onBlur={handleInputBlur}
                         disabled={inputsDisabled}
                         className={clsx(
-                            "w-24 md:w-40 text-center bg-transparent text-7xl md:text-9xl font-light tracking-tighter text-white focus:outline-none focus:bg-white/5 rounded-xl transition-all",
+                            "w-16 sm:w-20 md:w-32 lg:w-40 text-center bg-transparent text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-light tracking-tighter text-white focus:outline-none focus:bg-white/5 rounded-xl transition-all p-0",
                             inputsDisabled ? "cursor-default select-none opacity-80" : "cursor-text hover:bg-white/5"
                         )}
                     />
-                    <span className="text-sm md:text-base font-semibold text-zinc-400 uppercase tracking-widest">sec</span>
+                    <span className="text-xs md:text-sm lg:text-base font-semibold text-zinc-400 uppercase tracking-widest">sec</span>
                  </div>
-
              </div>
 
           </div>

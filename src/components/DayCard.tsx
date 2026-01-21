@@ -34,7 +34,7 @@ function TimeBlockGroup({
       {/* Group Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className={`w-full px-5 py-3 flex items-center justify-between hover:bg-[var(--card-hover)] transition-colors ${
+        className={`w-full px-4 sm:px-5 py-3 flex items-center justify-between hover:bg-[var(--card-hover)] transition-colors ${
           isCurrentPeriod ? 'bg-[var(--accent-blue)]/5' : ''
         }`}
       >
@@ -75,7 +75,7 @@ function TimeBlockGroup({
       
       {/* Collapsible Content */}
       {isExpanded && (
-        <div className="px-5 pb-4 space-y-2">
+        <div className="px-3 sm:px-5 pb-4 space-y-2">
           {children}
         </div>
       )}
@@ -170,42 +170,66 @@ export default function DayCard({
   return (
     <div className={`day-card bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-2xl overflow-hidden ${day.completed ? 'border-green-500/30' : ''}`}>
       {/* Card Header - Always Visible */}
-      <div className="px-5 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="text-left">
-            <div className="flex items-center gap-2">
-              {isEditingName ? (
-                <input
-                  type="text"
-                  value={customName}
-                  onChange={(e) => setCustomName(e.target.value)}
-                  onBlur={() => setIsEditingName(false)}
-                  onKeyDown={(e) => e.key === 'Enter' && setIsEditingName(false)}
-                  placeholder={formatDate(day.date)}
-                  className="editable-title text-[var(--text-primary)] bg-[var(--bg-tertiary)] px-2 py-1 rounded w-40"
-                  autoFocus
-                />
-              ) : (
-                <button
-                  onClick={() => setIsEditingName(true)}
-                  className="text-[var(--text-primary)] font-semibold hover:text-[var(--accent-blue)] transition-colors"
-                  title="Click to edit name"
-                >
-                  {displayName}
-                </button>
-              )}
-              <span className="text-xs text-[var(--text-secondary)]">({day.date})</span>
+      <div className="px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4 w-full sm:w-auto">
+          <div className="text-left w-full sm:w-auto">
+            <div className="flex items-center justify-between sm:justify-start gap-2">
+              <div className="flex items-center gap-2">
+                  {isEditingName ? (
+                    <input
+                      type="text"
+                      value={customName}
+                      onChange={(e) => setCustomName(e.target.value)}
+                      onBlur={() => setIsEditingName(false)}
+                      onKeyDown={(e) => e.key === 'Enter' && setIsEditingName(false)}
+                      placeholder={formatDate(day.date)}
+                      className="editable-title text-[var(--text-primary)] bg-[var(--bg-tertiary)] px-2 py-1 rounded w-32 sm:w-40"
+                      autoFocus
+                    />
+                  ) : (
+                    <button
+                      onClick={() => setIsEditingName(true)}
+                      className="text-[var(--text-primary)] font-semibold hover:text-[var(--accent-blue)] transition-colors truncate max-w-[150px] sm:max-w-none"
+                      title="Click to edit name"
+                    >
+                      {displayName}
+                    </button>
+                  )}
+                  <span className="text-xs text-[var(--text-secondary)] whitespace-nowrap">({day.date})</span>
+              </div>
+              
               {day.completed && (
-                <span className="px-2 py-0.5 text-xs bg-green-500/20 text-green-400 rounded-full">Done</span>
+                <span className="sm:hidden px-2 py-0.5 text-xs bg-green-500/20 text-green-400 rounded-full">Done</span>
               )}
+
+              {/* Mobile Expand Icon */}
+              <button
+                onClick={onToggleExpand}
+                className="p-1 sm:hidden hover:bg-[var(--bg-tertiary)] rounded-lg transition-colors ml-auto"
+              >
+                <svg 
+                  className={`w-5 h-5 text-[var(--text-secondary)] transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
             </div>
-            <div className="text-xs text-[var(--text-secondary)] mt-0.5">
-              {day.startTime} – {day.endTime} • {day.timeBlocks.length} blocks
+            
+            <div className="flex items-center justify-between mt-1 sm:mt-0.5">
+                <div className="text-xs text-[var(--text-secondary)]">
+                  {day.startTime} – {day.endTime} • {day.timeBlocks.length} blocks
+                </div>
             </div>
           </div>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="hidden sm:flex items-center gap-4">
+          {day.completed && (
+            <span className="hidden sm:inline px-2 py-0.5 text-xs bg-green-500/20 text-green-400 rounded-full">Done</span>
+          )}
           {/* Progress */}
           <div className="flex items-center gap-3">
             <div className="w-24 h-2 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
@@ -233,6 +257,19 @@ export default function DayCard({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
+        </div>
+        
+        {/* Mobile Progress Bar */}
+        <div className="sm:hidden w-full flex items-center gap-3 mt-2">
+            <div className="flex-1 h-1.5 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
+              <div 
+                className="h-full accent-notion transition-all duration-300"
+                style={{ width: `${percentage}%` }}
+              />
+            </div>
+            <span className="text-xs text-[var(--text-secondary)] font-mono">
+              {completedCount}/{day.timeBlocks.length}
+            </span>
         </div>
       </div>
 

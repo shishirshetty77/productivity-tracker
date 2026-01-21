@@ -386,6 +386,13 @@ export default function Dashboard() {
         <div className="max-w-3xl mx-auto h-full px-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
              <h1 className="text-sm font-medium text-[var(--text-secondary)] hidden sm:block">Productivity Tracker</h1>
+             {/* Mobile Logo */}
+             <div className="sm:hidden w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+             </div>
+
              {user.role === 'ADMIN' && (
                 <Link href="/admin" className="text-xs px-2 py-1 bg-purple-500/10 text-purple-400 rounded hover:bg-purple-500/20 transition-colors">
                     Admin
@@ -393,18 +400,20 @@ export default function Dashboard() {
              )}
           </div>
           
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {/* View Toggles */}
             <div className="flex bg-[var(--bg-tertiary)] p-0.5 rounded-lg">
                 <button
                     onClick={() => setViewMode('list')}
                     className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-[var(--bg-primary)] shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}
+                    aria-label="List View"
                 >
                     <List size={16} />
                 </button>
                 <button
                     onClick={() => setViewMode('calendar')}
                     className={`p-1.5 rounded-md transition-colors ${viewMode === 'calendar' ? 'bg-[var(--bg-primary)] shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}
+                    aria-label="Calendar View"
                 >
                     <Calendar size={16} />
                 </button>
@@ -418,18 +427,18 @@ export default function Dashboard() {
                 <Focus size={18} />
             </button>
 
-            <div className="h-4 w-[1px] bg-[var(--border-primary)]" />
+            <div className="h-4 w-[1px] bg-[var(--border-primary)] hidden sm:block" />
             
             <div className="flex items-center gap-2">
-                <span className={`text-xs transition-colors duration-300 ${
+                <span className={`text-xs transition-colors duration-300 hidden sm:inline ${
                 saveStatus === 'saving' ? 'text-yellow-500/80' : 
                 saveStatus === 'saved' ? 'text-green-500/60' : 
                 saveStatus === 'error' ? 'text-red-400' : 'text-transparent'
                 }`}>
                 {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : saveStatus === 'error' ? 'Error' : ''}
                 </span>
-                <span className="text-xs text-[var(--text-secondary)] hidden sm:inline">{user.username}</span>
-                <button onClick={handleLogout} className="text-xs bg-[var(--bg-tertiary)] hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] px-3 py-1.5 rounded transition-all">
+                <span className="text-xs text-[var(--text-secondary)] hidden md:inline">{user.username}</span>
+                <button onClick={handleLogout} className="text-xs bg-[var(--bg-tertiary)] hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] px-3 py-1.5 rounded transition-all whitespace-nowrap">
                     Sign Out
                 </button>
             </div>
