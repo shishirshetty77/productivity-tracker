@@ -1,10 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { X, Play, Pause, RotateCw, CheckCircle2, Maximize2, Minimize2 } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { X, Play, Pause, RotateCw, CheckCircle2, Square } from 'lucide-react';
 import { TimeBlock } from '@/types';
-import { formatTime } from '@/lib/utils';
 import { clsx } from 'clsx';
+
+// Timer States
+type TimerState = 'IDLE' | 'READY' | 'RUNNING' | 'PAUSED' | 'COMPLETED' | 'CANCELLED';
+
+// Constants
+const DEFAULT_TIME = 25 * 60; // 25 minutes in seconds
+const MIN_TIME = 1; // 1 second
+const MAX_TIME = 48 * 60 * 60; // 48 hours in seconds
+const STORAGE_KEY = 'focus_timer_state';
+
+interface TimerPersistence {
+  state: TimerState;
+  endTime: number | null;
+  remainingMs: number;
+  totalTime: number;
+}
 
 interface FocusModeProps {
   currentBlock: TimeBlock | null;
@@ -13,128 +28,522 @@ interface FocusModeProps {
 }
 
 export default function FocusMode({ currentBlock, onClose, onComplete }: FocusModeProps) {
-  const [timeLeft, setTimeLeft] = useState(25 * 60); // 25 minutes default
-  const [isActive, setIsActive] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  // State
+  const [timerState, setTimerState] = useState<TimerState>('IDLE');
+  const [remainingMs, setRemainingMs] = useState(DEFAULT_TIME * 1000);
+  const [totalTime, setTotalTime] = useState(DEFAULT_TIME * 1000);
+  const [endTime, setEndTime] = useState<number | null>(null);
+  
+  // Input state for smooth typing
+  const [hoursInput, setHoursInput] = useState('00');
+  const [minutesInput, setMinutesInput] = useState('25');
+  const [secondsInput, setSecondsInput] = useState('00');
+  
+  // Refs
+  const animationRef = useRef<number | null>(null);
+  const lastClickRef = useRef<number>(0);
+  const completionFiredRef = useRef(false);
+  
+  // Debounce constant
+  const DEBOUNCE_MS = 300;
 
+  // Load persisted state on mount
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const data: TimerPersistence = JSON.parse(saved);
+        
+        if (data.state === 'RUNNING' && data.endTime) {
+          const now = Date.now();
+          if (now >= data.endTime) {
+            // Timer already expired
+            setTimerState('COMPLETED');
+            setRemainingMs(0);
+            setTotalTime(data.totalTime);
+          } else {
+            // Resume running timer
+            setTimerState('RUNNING');
+            setEndTime(data.endTime);
+            setTotalTime(data.totalTime);
+            setRemainingMs(data.endTime - now);
+          }
+        } else if (data.state === 'PAUSED') {
+          setTimerState('PAUSED');
+          setRemainingMs(data.remainingMs);
+          setTotalTime(data.totalTime);
+        } else {
+          // Reset to IDLE with saved time
+          setTimerState('IDLE');
+          setRemainingMs(data.remainingMs || DEFAULT_TIME * 1000);
+          setTotalTime(data.totalTime || DEFAULT_TIME * 1000);
+        }
+        updateInputsFromMs(data.remainingMs || DEFAULT_TIME * 1000);
+      }
+    } catch (e) {
+      console.error('Failed to load timer state:', e);
+    }
+  }, []);
 
-    if (isActive && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
-    } else if (timeLeft === 0) {
-      setIsActive(false);
-      // Play sound or notification here
+  // Persist state changes
+  useEffect(() => {
+    const data: TimerPersistence = {
+      state: timerState,
+      endTime: endTime,
+      remainingMs: remainingMs,
+      totalTime: totalTime,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }, [timerState, endTime, remainingMs, totalTime]);
+
+  // Precision timer loop using requestAnimationFrame
+  useEffect(() => {
+    if (timerState !== 'RUNNING' || !endTime) {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+      return;
     }
 
-    return () => clearInterval(interval);
-  }, [isActive, timeLeft]);
+    const tick = () => {
+      const now = Date.now();
+      const remaining = Math.max(0, endTime - now);
+      setRemainingMs(remaining);
 
-  const toggleTimer = () => setIsActive(!isActive);
-  const resetTimer = () => {
-    setIsActive(false);
-    setTimeLeft(25 * 60);
-  };
-
-  const formatTimer = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-      setIsFullscreen(true);
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-        setIsFullscreen(false);
+      if (remaining <= 0 && !completionFiredRef.current) {
+        completionFiredRef.current = true;
+        setTimerState('COMPLETED');
+        setRemainingMs(0);
+        // Could trigger audio/notification here
+        return;
       }
+
+      animationRef.current = requestAnimationFrame(tick);
+    };
+
+    animationRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+    };
+  }, [timerState, endTime]);
+
+  // Handle visibility change (background tab)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && timerState === 'RUNNING' && endTime) {
+        const now = Date.now();
+        const remaining = Math.max(0, endTime - now);
+        setRemainingMs(remaining);
+        
+        if (remaining <= 0) {
+          setTimerState('COMPLETED');
+          completionFiredRef.current = true;
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [timerState, endTime]);
+
+  // Update input fields from milliseconds
+  const updateInputsFromMs = (ms: number) => {
+    const totalSec = Math.floor(ms / 1000);
+    const hrs = Math.floor(totalSec / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const secs = totalSec % 60;
+    setHoursInput(hrs.toString().padStart(2, '0'));
+    setMinutesInput(mins.toString().padStart(2, '0'));
+    setSecondsInput(secs.toString().padStart(2, '0'));
+  };
+
+  // Sync inputs with remainingMs when not running
+  useEffect(() => {
+    if (timerState !== 'RUNNING') {
+      updateInputsFromMs(remainingMs);
+    }
+  }, [remainingMs, timerState]);
+
+  // Parse and validate input time
+  const parseInputTime = useCallback((): number => {
+    const hrs = Math.min(48, Math.max(0, parseInt(hoursInput) || 0));
+    const mins = Math.min(59, Math.max(0, parseInt(minutesInput) || 0));
+    const secs = Math.min(59, Math.max(0, parseInt(secondsInput) || 0));
+    
+    let totalSec = hrs * 3600 + mins * 60 + secs;
+    
+    // Clamp to valid range
+    if (totalSec < MIN_TIME) totalSec = MIN_TIME;
+    if (totalSec > MAX_TIME) totalSec = MAX_TIME;
+    
+    return totalSec * 1000;
+  }, [hoursInput, minutesInput, secondsInput]);
+
+  // Validate and format on blur
+  const handleInputBlur = useCallback(() => {
+    if (timerState === 'RUNNING') return;
+    
+    const ms = parseInputTime();
+    setRemainingMs(ms);
+    setTotalTime(ms);
+    updateInputsFromMs(ms);
+    
+    if (timerState === 'IDLE') {
+      setTimerState('READY');
+    }
+  }, [parseInputTime, timerState]);
+
+  // Debounced action handler
+  const debounce = useCallback((action: () => void) => {
+    const now = Date.now();
+    if (now - lastClickRef.current < DEBOUNCE_MS) return;
+    lastClickRef.current = now;
+    action();
+  }, []);
+
+  // Start timer
+  const startTimer = useCallback(() => {
+    debounce(() => {
+      if (timerState === 'RUNNING' || timerState === 'COMPLETED') return;
+      
+      const ms = parseInputTime();
+      if (ms < MIN_TIME * 1000) return; // Block 00:00:00
+      
+      completionFiredRef.current = false;
+      const end = Date.now() + ms;
+      setEndTime(end);
+      setRemainingMs(ms);
+      setTotalTime(ms);
+      setTimerState('RUNNING');
+    });
+  }, [debounce, parseInputTime, timerState]);
+
+  // Pause timer
+  const pauseTimer = useCallback(() => {
+    debounce(() => {
+      if (timerState !== 'RUNNING') return;
+      
+      const remaining = endTime ? Math.max(0, endTime - Date.now()) : remainingMs;
+      setRemainingMs(remaining);
+      setEndTime(null);
+      setTimerState('PAUSED');
+    });
+  }, [debounce, endTime, remainingMs, timerState]);
+
+  // Resume timer
+  const resumeTimer = useCallback(() => {
+    debounce(() => {
+      if (timerState !== 'PAUSED') return;
+      
+      const end = Date.now() + remainingMs;
+      setEndTime(end);
+      setTimerState('RUNNING');
+    });
+  }, [debounce, remainingMs, timerState]);
+
+  // Cancel timer
+  const cancelTimer = useCallback(() => {
+    debounce(() => {
+      if (timerState === 'IDLE') return;
+      
+      setTimerState('CANCELLED');
+      setEndTime(null);
+      // Don't reset time, keep last setting
+    });
+  }, [debounce, timerState]);
+
+  // Reset timer to default
+  const resetTimer = useCallback(() => {
+    debounce(() => {
+      setTimerState('IDLE');
+      setEndTime(null);
+      setRemainingMs(DEFAULT_TIME * 1000);
+      setTotalTime(DEFAULT_TIME * 1000);
+      completionFiredRef.current = false;
+      updateInputsFromMs(DEFAULT_TIME * 1000);
+    });
+  }, [debounce]);
+
+  // Toggle play/pause
+  const toggleTimer = useCallback(() => {
+    if (timerState === 'RUNNING') {
+      pauseTimer();
+    } else if (timerState === 'PAUSED') {
+      resumeTimer();
+    } else if (timerState === 'IDLE' || timerState === 'READY' || timerState === 'CANCELLED') {
+      startTimer();
+    }
+  }, [pauseTimer, resumeTimer, startTimer, timerState]);
+
+  // Keyboard controls
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        toggleTimer();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        if (timerState === 'RUNNING' || timerState === 'PAUSED') {
+          cancelTimer();
+        } else {
+          onClose();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [toggleTimer, cancelTimer, onClose, timerState]);
+
+  // Calculate display values
+  const displayTotalSec = Math.ceil(remainingMs / 1000);
+  const displayHours = Math.floor(displayTotalSec / 3600);
+  const displayMinutes = Math.floor((displayTotalSec % 3600) / 60);
+  const displaySeconds = displayTotalSec % 60;
+  
+  // Progress calculation
+  const progress = totalTime > 0 ? remainingMs / totalTime : 0;
+  
+  // Input disabled when running
+  const inputsDisabled = timerState === 'RUNNING';
+
+  // Input change handlers with validation
+  const handleHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (inputsDisabled) return;
+    const val = e.target.value.replace(/\D/g, '').slice(0, 2);
+    let num = parseInt(val) || 0;
+    if (num > 48) num = 48;
+    setHoursInput(num.toString().padStart(val.length > 0 ? val.length : 1, '0'));
+    if (timerState !== 'RUNNING') setTimerState('READY');
+  };
+
+  const handleMinutesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (inputsDisabled) return;
+    const val = e.target.value.replace(/\D/g, '').slice(0, 2);
+    let num = parseInt(val) || 0;
+    if (num > 59) num = 59;
+    setMinutesInput(num.toString().padStart(val.length > 0 ? val.length : 1, '0'));
+    if (timerState !== 'RUNNING') setTimerState('READY');
+  };
+
+  const handleSecondsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (inputsDisabled) return;
+    const val = e.target.value.replace(/\D/g, '').slice(0, 2);
+    let num = parseInt(val) || 0;
+    if (num > 59) num = 59;
+    setSecondsInput(num.toString().padStart(val.length > 0 ? val.length : 1, '0'));
+    if (timerState !== 'RUNNING') setTimerState('READY');
+  };
+
+  // Status text
+  const getStatusText = () => {
+    switch (timerState) {
+      case 'RUNNING': return 'Running';
+      case 'PAUSED': return 'Paused';
+      case 'COMPLETED': return 'Completed!';
+      case 'CANCELLED': return 'Cancelled';
+      default: return '';
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-[var(--bg-primary)] flex flex-col items-center justify-center p-6 animate-in fade-in duration-300">
-      {/* Controls */}
-      <div className="absolute top-6 right-6 flex items-center gap-4">
-        <button 
-          onClick={toggleFullscreen}
-          className="p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] rounded-full transition-colors"
-        >
-          {isFullscreen ? <Minimize2 size={24} /> : <Maximize2 size={24} />}
-        </button>
-        <button 
-          onClick={onClose}
-          className="p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] rounded-full transition-colors"
-        >
-          <X size={28} />
-        </button>
-      </div>
+    <div className="fixed inset-0 z-[9999] bg-[var(--bg-primary)] flex flex-col items-center justify-center animate-in fade-in duration-500 font-sans">
+      
+      {/* Main Container - Hover to show controls */}
+      <div className="relative group flex flex-col items-center w-full max-w-4xl h-full justify-center">
 
-      <div className="max-w-2xl w-full text-center space-y-12">
-        {/* Status */}
-        <div className="space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border-primary)]">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-sm font-medium uppercase tracking-wider">Focus Mode</span>
+          {/* Top Right Exit - Visible on Hover */}
+          <div className="absolute top-8 right-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <button 
+              onClick={onClose}
+              className="p-3 text-[var(--text-secondary)] hover:text-white rounded-full transition-colors hover:bg-white/5"
+            >
+              <X size={28} />
+            </button>
+          </div>
+
+          {/* Activity Name & Status */}
+          <div className="absolute top-20 text-center space-y-2 opacity-80 group-hover:opacity-100 transition-opacity">
+            <h1 className="text-2xl md:text-3xl font-medium tracking-wide text-[var(--text-secondary)]">
+                {currentBlock?.activity || "Deep Focus"}
+            </h1>
+            {getStatusText() && (
+              <p className={clsx(
+                "text-sm font-medium",
+                timerState === 'COMPLETED' ? "text-green-400" :
+                timerState === 'PAUSED' ? "text-yellow-400" :
+                timerState === 'CANCELLED' ? "text-red-400" :
+                "text-[var(--text-secondary)]"
+              )}>
+                {getStatusText()}
+              </p>
+            )}
+          </div>
+
+          {/* Rectangular Timer Container */}
+          <div className="relative w-full max-w-[800px] h-[220px] md:h-[280px] flex items-center justify-center">
+             
+             {/* SVG Rectangle Progress */}
+             <svg className="absolute inset-0 w-full h-full pointer-events-none drop-shadow-2xl overflow-visible">
+                 <rect
+                     x="0"
+                     y="0"
+                     width="100%"
+                     height="100%"
+                     rx="12"
+                     ry="12"
+                     fill="none"
+                     stroke="var(--bg-tertiary)"
+                     strokeWidth="4"
+                 />
+                 <rect
+                     x="0"
+                     y="0"
+                     width="100%"
+                     height="100%"
+                     rx="12"
+                     ry="12"
+                     fill="none"
+                     stroke={timerState === 'COMPLETED' ? '#22c55e' : 'var(--timer-progress)'} 
+                     strokeWidth="4"
+                     pathLength={100}
+                     strokeDasharray="100"
+                     strokeDashoffset={100 - (progress * 100)}
+                     strokeLinecap="round"
+                     className="transition-all duration-300 ease-linear"
+                 />
+             </svg>
+
+             {/* Inputs */}
+             <div className="flex items-end gap-4 md:gap-8 z-50 px-8 relative">
+                 
+                 {/* Hours */}
+                 <div className="flex flex-col items-center gap-2">
+                    <input
+                        type="text"
+                        inputMode="numeric"
+                        value={inputsDisabled ? displayHours.toString().padStart(2, '0') : hoursInput}
+                        onChange={handleHoursChange}
+                        onBlur={handleInputBlur}
+                        disabled={inputsDisabled}
+                        className={clsx(
+                            "w-24 md:w-40 text-center bg-transparent text-7xl md:text-9xl font-light tracking-tighter text-white focus:outline-none focus:bg-white/5 rounded-xl transition-all",
+                            inputsDisabled ? "cursor-default select-none opacity-80" : "cursor-text hover:bg-white/5"
+                        )}
+                    />
+                    <span className="text-sm md:text-base font-semibold text-zinc-400 uppercase tracking-widest">hr</span>
+                 </div>
+                 
+                 <span className="text-7xl md:text-9xl font-light text-zinc-600 pb-8 md:pb-10">:</span>
+
+                 {/* Minutes */}
+                 <div className="flex flex-col items-center gap-2">
+                    <input
+                        type="text"
+                        inputMode="numeric"
+                        value={inputsDisabled ? displayMinutes.toString().padStart(2, '0') : minutesInput}
+                        onChange={handleMinutesChange}
+                        onBlur={handleInputBlur}
+                        disabled={inputsDisabled}
+                        className={clsx(
+                            "w-24 md:w-40 text-center bg-transparent text-7xl md:text-9xl font-light tracking-tighter text-white focus:outline-none focus:bg-white/5 rounded-xl transition-all",
+                            inputsDisabled ? "cursor-default select-none opacity-80" : "cursor-text hover:bg-white/5"
+                        )}
+                    />
+                    <span className="text-sm md:text-base font-semibold text-zinc-400 uppercase tracking-widest">min</span>
+                 </div>
+
+                 <span className="text-7xl md:text-9xl font-light text-zinc-600 pb-8 md:pb-10">:</span>
+
+                 {/* Seconds */}
+                 <div className="flex flex-col items-center gap-2">
+                    <input
+                        type="text"
+                        inputMode="numeric"
+                        value={inputsDisabled ? displaySeconds.toString().padStart(2, '0') : secondsInput}
+                        onChange={handleSecondsChange}
+                        onBlur={handleInputBlur}
+                        disabled={inputsDisabled}
+                        className={clsx(
+                            "w-24 md:w-40 text-center bg-transparent text-7xl md:text-9xl font-light tracking-tighter text-white focus:outline-none focus:bg-white/5 rounded-xl transition-all",
+                            inputsDisabled ? "cursor-default select-none opacity-80" : "cursor-text hover:bg-white/5"
+                        )}
+                    />
+                    <span className="text-sm md:text-base font-semibold text-zinc-400 uppercase tracking-widest">sec</span>
+                 </div>
+
+             </div>
+
+          </div>
+
+          {/* Bottom Controls - Fade in on hover */}
+          <div className="absolute bottom-24 flex items-center gap-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-4 group-hover:translate-y-0 ease-out">
+             
+             {/* Reset button */}
+             <button 
+                onClick={resetTimer}
+                className="p-4 rounded-full text-[var(--text-secondary)] hover:text-white hover:bg-white/5 transition-all"
+                title="Reset to 25 min"
+             >
+                <RotateCw size={24} />
+             </button>
+
+             {/* Play/Pause button */}
+             <button 
+                onClick={toggleTimer}
+                disabled={timerState === 'COMPLETED'}
+                className={clsx(
+                  "w-20 h-20 flex items-center justify-center rounded-full transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)]",
+                  timerState === 'COMPLETED' 
+                    ? "bg-green-500 text-white cursor-default"
+                    : "bg-white text-black hover:scale-110 active:scale-95"
+                )}
+             >
+                {timerState === 'RUNNING' ? (
+                  <Pause size={32} fill="currentColor" />
+                ) : timerState === 'COMPLETED' ? (
+                  <CheckCircle2 size={32} />
+                ) : (
+                  <Play size={32} fill="currentColor" className="ml-1" />
+                )}
+             </button>
+
+             {/* Cancel button (when running/paused) */}
+             {(timerState === 'RUNNING' || timerState === 'PAUSED') && (
+               <button
+                  onClick={cancelTimer}
+                  className="p-4 rounded-full text-[var(--text-secondary)] hover:text-red-400 hover:bg-white/5 transition-all"
+                  title="Cancel"
+               >
+                  <Square size={24} />
+               </button>
+             )}
+
+             {/* Complete block button */}
+             {currentBlock && timerState !== 'RUNNING' && timerState !== 'PAUSED' && (
+                <button
+                    onClick={() => {
+                        onComplete(currentBlock.id);
+                        onClose();
+                    }}
+                    className={clsx(
+                        "p-4 rounded-full transition-all",
+                        currentBlock.done 
+                             ? "text-green-500 bg-green-500/10"
+                             : "text-[var(--text-secondary)] hover:text-green-400 hover:bg-white/5"
+                    )}
+                    title="Mark Complete"
+                >
+                    <CheckCircle2 size={24} />
+                </button>
+            )}
           </div>
           
-          <h1 className="text-4xl md:text-6xl font-bold text-[var(--text-primary)]">
-            {currentBlock?.activity || "No active task"}
-          </h1>
-          
-          {currentBlock && (
-             <p className="text-xl text-[var(--text-secondary)] font-mono">
-                {currentBlock.startTime} - {currentBlock.endTime}
-             </p>
-          )}
-        </div>
-
-        {/* Timer */}
-        <div className="relative group">
-            <div className="text-[120px] md:text-[180px] font-bold font-mono text-[var(--text-primary)] leading-none tracking-tighter tabular-nums select-none">
-                {formatTimer(timeLeft)}
-            </div>
-            
-            {/* Timer Controls */}
-            <div className="flex items-center justify-center gap-6 mt-8">
-                <button 
-                    onClick={toggleTimer}
-                    className="w-16 h-16 flex items-center justify-center rounded-full bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-hover)] transition-transform hover:scale-105 active:scale-95 shadow-lg"
-                >
-                    {isActive ? <Pause size={32} fill="currentColor" /> : <Play size={32} fill="currentColor" className="ml-1" />}
-                </button>
-                
-                <button 
-                    onClick={resetTimer}
-                    className="w-12 h-12 flex items-center justify-center rounded-full bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] transition-colors"
-                >
-                    <RotateCw size={20} />
-                </button>
-            </div>
-        </div>
-
-        {/* Actions */}
-        {currentBlock && (
-            <button
-                onClick={() => {
-                    onComplete(currentBlock.id);
-                    onClose();
-                }}
-                className={clsx(
-                    "flex items-center gap-3 px-8 py-4 mx-auto rounded-full text-lg font-medium transition-all duration-300",
-                    currentBlock.done 
-                        ? "bg-green-500/10 text-green-500 cursor-default"
-                        : "bg-[var(--bg-tertiary)] text-[var(--text-primary)] hover:bg-green-500 hover:text-white"
-                )}
-            >
-                <CheckCircle2 size={24} />
-                {currentBlock.done ? 'Completed' : 'Mark as Complete'}
-            </button>
-        )}
       </div>
     </div>
   );

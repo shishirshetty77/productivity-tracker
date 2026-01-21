@@ -6,7 +6,6 @@ import { generateTimeBlocks, formatTime, getTodayDate } from '@/lib/utils';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import DayCard from '@/components/DayCard';
 import CalendarView from '@/components/CalendarView';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import FocusMode from '@/components/FocusMode';
 import Link from 'next/link';
 import { DndContext, DragEndEvent, useSensor, useSensors, PointerSensor, TouchSensor } from '@dnd-kit/core';
@@ -316,10 +315,8 @@ export default function Dashboard() {
                 className="p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--accent-blue)] rounded-lg transition-colors"
                 title="Entered Focus Mode"
             >
-                <Focus size={18} /> {/* Using Focus Icon if available, or just a generic one */}
+                <Focus size={18} />
             </button>
-
-            <ThemeToggle />
 
             <div className="h-4 w-[1px] bg-[var(--border-primary)]" />
             

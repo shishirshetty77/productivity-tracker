@@ -53,7 +53,7 @@ export default function DayCard({
   }, []);
 
   return (
-    <div className={`day-card bg-[#202020] border border-[#373737] rounded-2xl overflow-hidden ${day.completed ? 'border-green-500/30' : ''}`}>
+    <div className={`day-card bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-2xl overflow-hidden ${day.completed ? 'border-green-500/30' : ''}`}>
       {/* Card Header - Always Visible */}
       <div className="px-5 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -67,24 +67,24 @@ export default function DayCard({
                   onBlur={() => setIsEditingName(false)}
                   onKeyDown={(e) => e.key === 'Enter' && setIsEditingName(false)}
                   placeholder={formatDate(day.date)}
-                  className="editable-title text-white bg-[#373737] px-2 py-1 rounded w-40"
+                  className="editable-title text-[var(--text-primary)] bg-[var(--bg-tertiary)] px-2 py-1 rounded w-40"
                   autoFocus
                 />
               ) : (
                 <button
                   onClick={() => setIsEditingName(true)}
-                  className="text-white font-semibold hover:text-[#2383e2] transition-colors"
+                  className="text-[var(--text-primary)] font-semibold hover:text-[var(--accent-blue)] transition-colors"
                   title="Click to edit name"
                 >
                   {displayName}
                 </button>
               )}
-              <span className="text-xs text-[#5a5a5a]">({day.date})</span>
+              <span className="text-xs text-[var(--text-secondary)]">({day.date})</span>
               {day.completed && (
                 <span className="px-2 py-0.5 text-xs bg-green-500/20 text-green-400 rounded-full">Done</span>
               )}
             </div>
-            <div className="text-xs text-[#5a5a5a] mt-0.5">
+            <div className="text-xs text-[var(--text-secondary)] mt-0.5">
               {day.startTime} – {day.endTime} • {day.timeBlocks.length} blocks
             </div>
           </div>
@@ -93,13 +93,13 @@ export default function DayCard({
         <div className="flex items-center gap-4">
           {/* Progress */}
           <div className="flex items-center gap-3">
-            <div className="w-24 h-2 bg-[#373737] rounded-full overflow-hidden">
+            <div className="w-24 h-2 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
               <div 
                 className="h-full accent-notion transition-all duration-300"
                 style={{ width: `${percentage}%` }}
               />
             </div>
-            <span className="text-xs text-[#9b9b9b] font-mono w-16 text-right">
+            <span className="text-xs text-[var(--text-secondary)] font-mono w-16 text-right">
               {completedCount}/{day.timeBlocks.length}
             </span>
           </div>
@@ -107,10 +107,10 @@ export default function DayCard({
           {/* Expand Icon */}
           <button
             onClick={onToggleExpand}
-            className="p-2 hover:bg-[#373737] rounded-lg transition-colors"
+            className="p-2 hover:bg-[var(--bg-tertiary)] rounded-lg transition-colors"
           >
             <svg 
-              className={`w-5 h-5 text-[#9b9b9b] transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+              className={`w-5 h-5 text-[var(--text-secondary)] transition-transform ${isExpanded ? 'rotate-180' : ''}`}
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"
@@ -123,7 +123,7 @@ export default function DayCard({
 
       {/* Expanded Content */}
       {isExpanded && (
-        <div className="expand-content border-t border-[#373737]" ref={containerRef}>
+        <div className="expand-content border-t border-[var(--border-primary)]" ref={containerRef}>
           <div className="p-5 space-y-2">
             {day.timeBlocks.map((block, index) => (
               <TimeBlockItem
@@ -144,9 +144,9 @@ export default function DayCard({
           </div>
           
           {/* Footer */}
-          <div className="px-5 py-3 bg-[#1f1f1f] border-t border-[#373737] flex justify-between items-center">
+          <div className="px-5 py-3 bg-[var(--bg-primary)] border-t border-[var(--border-primary)] flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <span className="text-xs text-[#5a5a5a]">
+              <span className="text-xs text-[var(--text-secondary)]">
                 {percentage}% complete
               </span>
               <button
@@ -161,7 +161,7 @@ export default function DayCard({
               className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-colors ${
                 day.completed 
                   ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' 
-                  : 'bg-[#373737] text-[#9b9b9b] hover:bg-[#4a4a4a] hover:text-white'
+                  : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--card-hover)] hover:text-[var(--text-primary)]'
               }`}
             >
               {day.completed ? '✓ Completed' : 'Mark Complete'}

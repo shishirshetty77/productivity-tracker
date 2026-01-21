@@ -2,68 +2,74 @@
 
 @theme {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* Notion Dark Palette */
+  --color-bg-primary: #191919;
+  --color-bg-secondary: #2F3437;
+  --color-bg-tertiary: #3F4447;
+  --color-bg-overlay: rgba(25, 25, 25, 0.95);
+
+  --color-text-primary: #EBECED;
+  --color-text-secondary: #979A9B;
+  --color-text-placeholder: rgba(235, 236, 237, 0.2);
+
+  --color-border-primary: rgba(255, 255, 255, 0.08);
+
+  --color-accent-blue: #2383E2;
+  --color-accent-hover: #1A6CC0;
+
+  --color-card-hover: #252525;
+
+  --color-block-completed-bg: rgba(46, 170, 110, 0.15);
+  --color-block-completed-border: rgba(46, 170, 110, 0.4);
+  --color-block-skipped-bg: rgba(235, 87, 87, 0.1);
+  --color-block-skipped-border: rgba(235, 87, 87, 0.4);
 }
 
-/* Notion-style color scheme */
+/* Base setup */
 :root {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f7f7f5;
-  --bg-tertiary: #ebebeb;
-  --bg-overlay: rgba(255, 255, 255, 0.8);
-  --text-primary: #37352f;
-  --text-secondary: rgba(55, 53, 47, 0.65);
-  --text-placeholder: rgba(55, 53, 47, 0.3);
-  --border-primary: rgba(55, 53, 47, 0.16);
-  --accent-blue: #2383e2;
-  --accent-hover: #1a6cb8;
-  --card-hover: #f1f1ef;
-  --block-completed-bg: rgba(46, 170, 110, 0.08);
-  --block-completed-border: rgba(46, 170, 110, 0.3);
-  --block-skipped-bg: rgba(235, 87, 87, 0.08);
-  --block-skipped-border: rgba(235, 87, 87, 0.3);
-
-  --scrollbar-thumb: #d3d1cb;
-  --scrollbar-hover: #aeaca6;
-
-  color-scheme: light;
-}
-
-[data-theme="dark"] {
-  --bg-primary: #191919;
-  --bg-secondary: #202020;
-  --bg-tertiary: #2a2a2a;
-  --bg-overlay: rgba(32, 32, 32, 0.8);
-  --text-primary: rgba(255, 255, 255, 0.81);
-  --text-secondary: #888888;
-  --text-placeholder: rgba(255, 255, 255, 0.13);
-  --border-primary: #333333;
-  --accent-blue: #2383e2;
-  --accent-hover: #1a6cb8;
-  --card-hover: #252525;
-  --block-completed-bg: rgba(46, 170, 110, 0.08);
-  --block-completed-border: rgba(46, 170, 110, 0.3);
-  --block-skipped-bg: rgba(235, 87, 87, 0.08);
-  --block-skipped-border: rgba(235, 87, 87, 0.3);
-
-  --scrollbar-thumb: #373737;
-  --scrollbar-hover: #4a4a4a;
-
   color-scheme: dark;
+  --scrollbar-thumb: #474C50;
+  --scrollbar-hover: #5A5F63;
+  
+  /* CSS Variable Aliases - for component usage */
+  --bg-primary: var(--color-bg-primary);
+  --bg-secondary: var(--color-bg-secondary);
+  --bg-tertiary: var(--color-bg-tertiary);
+  --bg-overlay: var(--color-bg-overlay);
+  
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --text-placeholder: var(--color-text-placeholder);
+  
+  --border-primary: var(--color-border-primary);
+  
+  --accent-blue: var(--color-accent-blue);
+  --accent-hover: var(--color-accent-hover);
+  
+  --card-hover: var(--color-card-hover);
+  
+  /* Timer progress stroke color */
+  --timer-progress: #e0e0e0;
 }
 
-/* Base styles */
+/* Accent blue background utility */
+.accent-notion {
+  background-color: var(--accent-blue);
+}
+
+
 body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -72,7 +78,7 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: var(--scrollbar-thumb);
-  border-radius: 3px;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -81,20 +87,20 @@ body {
 
 /* Focus visible styles */
 :focus-visible {
-  outline: 2px solid var(--accent-blue);
+  outline: 2px solid var(--color-accent-blue);
   outline-offset: 2px;
 }
 
 /* Selection colors */
 ::selection {
   background-color: rgba(35, 131, 226, 0.3);
-  color: var(--text-primary);
+  color: white;
 }
 
 /* Input placeholder colors */
 input::placeholder,
 textarea::placeholder {
-  color: var(--text-placeholder);
+  color: var(--color-text-placeholder);
 }
 
 /* Auto-expanding textarea */
@@ -104,13 +110,13 @@ textarea::placeholder {
   overflow: hidden;
 }
 
-/* Card hover effects - subtle like Notion */
+/* Card hover effects */
 .day-card {
-  transition: background-color 0.15s ease;
+  transition: background-color 0.1s ease;
 }
 
 .day-card:hover {
-  background-color: var(--card-hover);
+  background-color: var(--color-card-hover);
 }
 
 /* Smooth expand animation */
@@ -129,35 +135,11 @@ textarea::placeholder {
   }
 }
 
-/* Notion accent - subtle gray-blue */
-.accent-notion {
-  background-color: var(--accent-blue);
-}
-
-/* Completed block style */
-.block-completed {
-  background: var(--block-completed-bg);
-  border-color: var(--block-completed-border);
-}
-
-/* Skipped block style */
-.block-skipped {
-  background: var(--block-skipped-bg);
-  border-color: var(--block-skipped-border);
-}
-
-/* Time badge */
-.time-badge {
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
-  font-size: 0.75rem;
-  letter-spacing: 0.02em;
-}
-
 /* Date picker styling */
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="time"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
-  filter: invert(0.5); /* Adaptive filter */
+  filter: invert(0.85); 
 }
 
 /* Editable title */
@@ -166,11 +148,11 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   border: none;
   outline: none;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
 }
 
 .editable-title:focus {
-  background: var(--bg-secondary);
+  background: var(--color-bg-secondary);
   border-radius: 4px;
   padding: 2px 6px;
   margin: -2px -6px;

@@ -106,9 +106,9 @@ export default function CalendarView({ days, onSelectDay }: CalendarViewProps) {
               {dayData && (
                 <div className="mt-2 space-y-1">
                   {/* Progress Bar */}
-                  <div className="w-full h-1.5 bg-[var(--border-primary)] rounded-full overflow-hidden">
+                  <div className="w-full h-1.5 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-[var(--accent-blue)] transition-all duration-500"
+                      className="h-full bg-[var(--accent-blue)] rounded-full transition-all duration-500"
                       style={{ width: `${percentage}%` }}
                     />
                   </div>
