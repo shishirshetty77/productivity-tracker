@@ -1,9 +1,87 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, ReactNode } from 'react';
 import { Day, TimeBlock } from '@/types';
 import { getTodayDate, calculateCompletionPercentage } from '@/lib/utils';
 import TimeBlockItem from './TimeBlockItem';
+import { ChevronDown } from 'lucide-react';
+
+// Collapsible group component for time periods
+interface TimeBlockGroupProps {
+  label: string;
+  icon: string;
+  completedCount: number;
+  totalCount: number;
+  isCurrentPeriod: boolean;
+  defaultExpanded: boolean;
+  children: ReactNode;
+}
+
+function TimeBlockGroup({ 
+  label, 
+  icon, 
+  completedCount, 
+  totalCount, 
+  isCurrentPeriod,
+  defaultExpanded,
+  children 
+}: TimeBlockGroupProps) {
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+  
+  return (
+    <div className="border-b border-[var(--border-primary)] last:border-b-0">
+      {/* Group Header */}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className={`w-full px-5 py-3 flex items-center justify-between hover:bg-[var(--card-hover)] transition-colors ${
+          isCurrentPeriod ? 'bg-[var(--accent-blue)]/5' : ''
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-lg">{icon}</span>
+          <span className={`text-sm font-medium ${isCurrentPeriod ? 'text-[var(--accent-blue)]' : 'text-[var(--text-primary)]'}`}>
+            {label}
+          </span>
+          {isCurrentPeriod && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--accent-blue)] text-white font-medium">
+              NOW
+            </span>
+          )}
+        </div>
+        
+        <div className="flex items-center gap-3">
+          {/* Mini progress bar */}
+          <div className="hidden sm:flex items-center gap-2">
+            <div className="w-16 h-1.5 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-[var(--accent-blue)] rounded-full transition-all duration-300"
+                style={{ width: `${percentage}%` }}
+              />
+            </div>
+            <span className="text-xs text-[var(--text-secondary)] font-mono w-10">
+              {completedCount}/{totalCount}
+            </span>
+          </div>
+          
+          <ChevronDown 
+            size={18} 
+            className={`text-[var(--text-secondary)] transition-transform duration-200 ${
+              isExpanded ? 'rotate-180' : ''
+            }`}
+          />
+        </div>
+      </button>
+      
+      {/* Collapsible Content */}
+      {isExpanded && (
+        <div className="px-5 pb-4 space-y-2">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface DayCardProps {
   day: Day;
@@ -164,26 +242,70 @@ export default function DayCard({
           {/* Scrollable time blocks container */}
           <div 
             ref={scrollContainerRef}
-            className="max-h-[400px] overflow-y-auto p-5 space-y-2 scroll-smooth"
+            className="max-h-[450px] overflow-y-auto scroll-smooth"
           >
-            {day.timeBlocks.map((block, index) => (
-              <div key={block.id} data-block-index={index}>
-                <TimeBlockItem
-                  id={block.id}
-                  startTime={block.startTime}
-                  endTime={block.endTime}
-                  done={block.done}
-                  skipped={block.skipped}
-                  activity={block.activity}
-                  onUpdate={onUpdateBlock}
-                  index={index}
-                  isFirst={index === 0}
-                  isLast={index === day.timeBlocks.length - 1}
-                  onNavigate={(direction) => handleNavigate(index, direction)}
-                  isCurrent={index === currentBlockIndex}
-                />
-              </div>
-            ))}
+            {/* Group time blocks by period */}
+            {(() => {
+              // Define time periods
+              type Period = 'morning' | 'afternoon' | 'evening';
+              const periods: { key: Period; label: string; icon: string; start: string; end: string }[] = [
+                { key: 'morning', label: 'Morning', icon: '🌅', start: '00:00', end: '12:00' },
+                { key: 'afternoon', label: 'Afternoon', icon: '☀️', start: '12:00', end: '17:00' },
+                { key: 'evening', label: 'Evening', icon: '🌙', start: '17:00', end: '24:00' },
+              ];
+              
+              // Group blocks by period
+              const groupedBlocks = periods.map(period => ({
+                ...period,
+                blocks: day.timeBlocks.filter(block => 
+                  block.startTime >= period.start && block.startTime < period.end
+                ).map(block => ({
+                  ...block,
+                  originalIndex: day.timeBlocks.findIndex(b => b.id === block.id)
+                }))
+              })).filter(group => group.blocks.length > 0);
+              
+              // Determine which period the current time is in
+              const currentPeriod = periods.find(p => 
+                currentTime >= p.start && currentTime < p.end
+              )?.key;
+              
+              return groupedBlocks.map((group, groupIndex) => {
+                const completedInGroup = group.blocks.filter(b => b.done).length;
+                const isCurrentPeriod = isToday && group.key === currentPeriod;
+                
+                return (
+                  <TimeBlockGroup
+                    key={group.key}
+                    label={group.label}
+                    icon={group.icon}
+                    completedCount={completedInGroup}
+                    totalCount={group.blocks.length}
+                    isCurrentPeriod={isCurrentPeriod}
+                    defaultExpanded={isCurrentPeriod || groupIndex === 0}
+                  >
+                    {group.blocks.map((block) => (
+                      <div key={block.id} data-block-index={block.originalIndex}>
+                        <TimeBlockItem
+                          id={block.id}
+                          startTime={block.startTime}
+                          endTime={block.endTime}
+                          done={block.done}
+                          skipped={block.skipped}
+                          activity={block.activity}
+                          onUpdate={onUpdateBlock}
+                          index={block.originalIndex}
+                          isFirst={block.originalIndex === 0}
+                          isLast={block.originalIndex === day.timeBlocks.length - 1}
+                          onNavigate={(direction) => handleNavigate(block.originalIndex, direction)}
+                          isCurrent={block.originalIndex === currentBlockIndex}
+                        />
+                      </div>
+                    ))}
+                  </TimeBlockGroup>
+                );
+              });
+            })()}
           </div>
           
           {/* Footer */}
