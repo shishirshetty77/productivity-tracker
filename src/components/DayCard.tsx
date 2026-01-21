@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect, ReactNode } from 'react';
-import { Day, TimeBlock } from '@/types';
+import { Day } from '@/types';
 import { getTodayDate, calculateCompletionPercentage } from '@/lib/utils';
 import TimeBlockItem from './TimeBlockItem';
 import { ChevronDown } from 'lucide-react';
@@ -249,7 +249,7 @@ export default function DayCard({
               // Define time periods
               type Period = 'morning' | 'afternoon' | 'evening';
               const periods: { key: Period; label: string; icon: string; start: string; end: string }[] = [
-                { key: 'morning', label: 'Morning', icon: '🌅', start: '00:00', end: '12:00' },
+                { key: 'morning', label: 'Morning', icon: '🌤️', start: '00:00', end: '12:00' },
                 { key: 'afternoon', label: 'Afternoon', icon: '☀️', start: '12:00', end: '17:00' },
                 { key: 'evening', label: 'Evening', icon: '🌙', start: '17:00', end: '24:00' },
               ];

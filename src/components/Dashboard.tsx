@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Day, TimeBlock } from '@/types'; // Import TimeBlock
-import { generateTimeBlocks, formatTime, getTodayDate } from '@/lib/utils';
+import { getTodayDate } from '@/lib/utils';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import DayCard from '@/components/DayCard';
 import CalendarView from '@/components/CalendarView';
@@ -107,7 +107,7 @@ export default function Dashboard() {
         } else {
             setAuthError(data.error || 'Authentication failed');
         }
-    } catch (err) {
+    } catch {
         setAuthError('Something went wrong');
     }
   };

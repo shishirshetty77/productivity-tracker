@@ -21,6 +21,45 @@ interface TimerPersistence {
   totalTime: number;
 }
 
+// Helper function for loading persisted state (outside component to avoid purity rules)
+function loadPersistedState(): { 
+  timerState: TimerState; 
+  remainingMs: number; 
+  totalTime: number; 
+  endTime: number | null;
+} {
+  if (typeof window === 'undefined') {
+    return { timerState: 'IDLE', remainingMs: DEFAULT_TIME * 1000, totalTime: DEFAULT_TIME * 1000, endTime: null };
+  }
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const data: TimerPersistence = JSON.parse(saved);
+      
+      if (data.state === 'RUNNING' && data.endTime) {
+        const now = Date.now();
+        if (now >= data.endTime) {
+          return { timerState: 'COMPLETED', remainingMs: 0, totalTime: data.totalTime, endTime: null };
+        } else {
+          return { timerState: 'RUNNING', remainingMs: data.endTime - now, totalTime: data.totalTime, endTime: data.endTime };
+        }
+      } else if (data.state === 'PAUSED') {
+        return { timerState: 'PAUSED', remainingMs: data.remainingMs, totalTime: data.totalTime, endTime: null };
+      } else {
+        return { 
+          timerState: 'IDLE', 
+          remainingMs: data.remainingMs || DEFAULT_TIME * 1000, 
+          totalTime: data.totalTime || DEFAULT_TIME * 1000, 
+          endTime: null 
+        };
+      }
+    }
+  } catch {
+    console.error('Failed to load timer state');
+  }
+  return { timerState: 'IDLE', remainingMs: DEFAULT_TIME * 1000, totalTime: DEFAULT_TIME * 1000, endTime: null };
+}
+
 interface FocusModeProps {
   currentBlock: TimeBlock | null;
   onClose: () => void;
@@ -28,16 +67,25 @@ interface FocusModeProps {
 }
 
 export default function FocusMode({ currentBlock, onClose, onComplete }: FocusModeProps) {
-  // State
-  const [timerState, setTimerState] = useState<TimerState>('IDLE');
-  const [remainingMs, setRemainingMs] = useState(DEFAULT_TIME * 1000);
-  const [totalTime, setTotalTime] = useState(DEFAULT_TIME * 1000);
-  const [endTime, setEndTime] = useState<number | null>(null);
+  // State with lazy initialization (function form avoids re-computation)
+  const [timerState, setTimerState] = useState<TimerState>(() => loadPersistedState().timerState);
+  const [remainingMs, setRemainingMs] = useState(() => loadPersistedState().remainingMs);
+  const [totalTime, setTotalTime] = useState(() => loadPersistedState().totalTime);
+  const [endTime, setEndTime] = useState<number | null>(() => loadPersistedState().endTime);
   
-  // Input state for smooth typing
-  const [hoursInput, setHoursInput] = useState('00');
-  const [minutesInput, setMinutesInput] = useState('25');
-  const [secondsInput, setSecondsInput] = useState('00');
+  // Input state - lazy initialization
+  const [hoursInput, setHoursInput] = useState(() => {
+    const initSec = Math.floor(loadPersistedState().remainingMs / 1000);
+    return Math.floor(initSec / 3600).toString().padStart(2, '0');
+  });
+  const [minutesInput, setMinutesInput] = useState(() => {
+    const initSec = Math.floor(loadPersistedState().remainingMs / 1000);
+    return Math.floor((initSec % 3600) / 60).toString().padStart(2, '0');
+  });
+  const [secondsInput, setSecondsInput] = useState(() => {
+    const initSec = Math.floor(loadPersistedState().remainingMs / 1000);
+    return (initSec % 60).toString().padStart(2, '0');
+  });
   
   // Refs
   const animationRef = useRef<number | null>(null);
@@ -47,43 +95,16 @@ export default function FocusMode({ currentBlock, onClose, onComplete }: FocusMo
   // Debounce constant
   const DEBOUNCE_MS = 300;
 
-  // Load persisted state on mount
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const data: TimerPersistence = JSON.parse(saved);
-        
-        if (data.state === 'RUNNING' && data.endTime) {
-          const now = Date.now();
-          if (now >= data.endTime) {
-            // Timer already expired
-            setTimerState('COMPLETED');
-            setRemainingMs(0);
-            setTotalTime(data.totalTime);
-          } else {
-            // Resume running timer
-            setTimerState('RUNNING');
-            setEndTime(data.endTime);
-            setTotalTime(data.totalTime);
-            setRemainingMs(data.endTime - now);
-          }
-        } else if (data.state === 'PAUSED') {
-          setTimerState('PAUSED');
-          setRemainingMs(data.remainingMs);
-          setTotalTime(data.totalTime);
-        } else {
-          // Reset to IDLE with saved time
-          setTimerState('IDLE');
-          setRemainingMs(data.remainingMs || DEFAULT_TIME * 1000);
-          setTotalTime(data.totalTime || DEFAULT_TIME * 1000);
-        }
-        updateInputsFromMs(data.remainingMs || DEFAULT_TIME * 1000);
-      }
-    } catch (e) {
-      console.error('Failed to load timer state:', e);
-    }
-  }, []);
+  // Helper: Update input fields from milliseconds
+  const updateInputsFromMs = (ms: number) => {
+    const totalSec = Math.floor(ms / 1000);
+    const hrs = Math.floor(totalSec / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const secs = totalSec % 60;
+    setHoursInput(hrs.toString().padStart(2, '0'));
+    setMinutesInput(mins.toString().padStart(2, '0'));
+    setSecondsInput(secs.toString().padStart(2, '0'));
+  };
 
   // Persist state changes
   useEffect(() => {
@@ -151,23 +172,7 @@ export default function FocusMode({ currentBlock, onClose, onComplete }: FocusMo
     return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, [timerState, endTime]);
 
-  // Update input fields from milliseconds
-  const updateInputsFromMs = (ms: number) => {
-    const totalSec = Math.floor(ms / 1000);
-    const hrs = Math.floor(totalSec / 3600);
-    const mins = Math.floor((totalSec % 3600) / 60);
-    const secs = totalSec % 60;
-    setHoursInput(hrs.toString().padStart(2, '0'));
-    setMinutesInput(mins.toString().padStart(2, '0'));
-    setSecondsInput(secs.toString().padStart(2, '0'));
-  };
-
-  // Sync inputs with remainingMs when not running
-  useEffect(() => {
-    if (timerState !== 'RUNNING') {
-      updateInputsFromMs(remainingMs);
-    }
-  }, [remainingMs, timerState]);
+  // Note: Input sync now handled via lazy state initialization
 
   // Parse and validate input time
   const parseInputTime = useCallback((): number => {

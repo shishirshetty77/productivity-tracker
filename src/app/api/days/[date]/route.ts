@@ -21,7 +21,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const day = await prisma.day.findFirst({
       where: { 
         date,
-        userId: session.userId 
+        userId: session.userId as string
       },
       include: {
         timeBlocks: {
@@ -56,7 +56,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const existingDay = await prisma.day.findFirst({
       where: { 
         date,
-        userId: session.userId 
+        userId: session.userId as string
       },
       include: { timeBlocks: true },
     });
@@ -136,7 +136,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const existingDay = await prisma.day.findFirst({
       where: { 
         date,
-        userId: session.userId 
+        userId: session.userId as string
       },
     });
 
