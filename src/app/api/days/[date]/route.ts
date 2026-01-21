@@ -51,7 +51,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { date } = await params;
     const body = await request.json();
-    const { startTime, endTime, completed } = body;
+    const { startTime, endTime, completed, sleepTime, wakeTime, sleepDuration, sleepQuality } = body;
 
     const existingDay = await prisma.day.findFirst({
       where: { 
@@ -64,6 +64,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (!existingDay) {
       return NextResponse.json({ error: 'Day not found' }, { status: 404 });
     }
+
+    // Build sleep data update object (only include if explicitly provided)
+    const sleepDataUpdate: Record<string, string | number | null | undefined> = {};
+    if (sleepTime !== undefined) sleepDataUpdate.sleepTime = sleepTime;
+    if (wakeTime !== undefined) sleepDataUpdate.wakeTime = wakeTime;
+    if (sleepDuration !== undefined) sleepDataUpdate.sleepDuration = sleepDuration;
+    if (sleepQuality !== undefined) sleepDataUpdate.sleepQuality = sleepQuality;
 
     // If time window changed, regenerate time blocks
     const timeWindowChanged =
@@ -86,6 +93,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           startTime: newStartTime,
           endTime: newEndTime,
           completed: completed ?? existingDay.completed,
+          ...sleepDataUpdate,
           timeBlocks: {
             create: blocks.map((block) => ({
               startTime: block.startTime,
@@ -103,11 +111,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json(day);
     }
 
-    // Just update completed status
+    // Just update completed status and/or sleep data
     const day = await prisma.day.update({
       where: { id: existingDay.id },
       data: {
         completed: completed ?? existingDay.completed,
+        ...sleepDataUpdate,
       },
       include: {
         timeBlocks: {

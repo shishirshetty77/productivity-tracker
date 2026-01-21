@@ -1,10 +1,19 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect, ReactNode } from 'react';
-import { Day } from '@/types';
+import { Day, SleepQuality } from '@/types';
 import { getTodayDate, calculateCompletionPercentage } from '@/lib/utils';
 import TimeBlockItem from './TimeBlockItem';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Moon } from 'lucide-react';
+
+// Sleep quality display helper
+const SLEEP_QUALITY_INFO: Record<SleepQuality, { emoji: string; label: string; color: string }> = {
+  DEEP: { emoji: '😴', label: 'Deep', color: 'text-purple-400' },
+  GOOD: { emoji: '😊', label: 'Good', color: 'text-green-400' },
+  LIGHT: { emoji: '💤', label: 'Light', color: 'text-blue-400' },
+  RESTLESS: { emoji: '😵‍💫', label: 'Restless', color: 'text-amber-400' },
+  POOR: { emoji: '😫', label: 'Poor', color: 'text-red-400' },
+};
 
 // Collapsible group component for time periods
 interface TimeBlockGroupProps {
@@ -219,8 +228,31 @@ export default function DayCard({
             </div>
             
             <div className="flex items-center justify-between mt-1 sm:mt-0.5">
-                <div className="text-xs text-[var(--text-secondary)]">
-                  {day.startTime} – {day.endTime} • {day.timeBlocks.length} blocks
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="text-xs text-[var(--text-secondary)]">
+                    {day.startTime} – {day.endTime} • {day.timeBlocks.length} blocks
+                  </span>
+                  
+                  {/* Sleep Info Badge */}
+                  {(day.sleepDuration || day.sleepQuality) && (
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-indigo-500/10 rounded-full">
+                      <Moon size={12} className="text-indigo-400" />
+                      {day.sleepDuration && (
+                        <span className={`text-xs font-medium ${
+                          day.sleepDuration >= 7 ? 'text-green-400' : 
+                          day.sleepDuration >= 5 ? 'text-amber-400' : 
+                          'text-red-400'
+                        }`}>
+                          {day.sleepDuration}h
+                        </span>
+                      )}
+                      {day.sleepQuality && (
+                        <span className="text-xs">
+                          {SLEEP_QUALITY_INFO[day.sleepQuality as SleepQuality]?.emoji || ''}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
             </div>
           </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Day, TimeBlock } from '@/types'; // Import TimeBlock
+import { Day, TimeBlock, SleepQuality } from '@/types';
 import { getTodayDate } from '@/lib/utils';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import DayCard from '@/components/DayCard';
@@ -9,7 +9,40 @@ import CalendarView from '@/components/CalendarView';
 import FocusMode from '@/components/FocusMode';
 import Link from 'next/link';
 import { DndContext, DragEndEvent, useSensor, useSensors, PointerSensor, TouchSensor } from '@dnd-kit/core';
-import { Calendar, List, Focus } from 'lucide-react'; // Import icons
+import { Calendar, List, Focus, Clock } from 'lucide-react';
+
+// Live Clock Component
+function LiveClock() {
+  const [time, setTime] = useState<string>('');
+
+  useEffect(() => {
+    // Set initial time immediately
+    const updateTime = () => {
+      const now = new Date();
+      setTime(now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }));
+    };
+    
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (!time) return null;
+
+  return (
+    <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-[var(--bg-tertiary)] rounded-lg">
+      <Clock size={14} className="text-[var(--text-secondary)]" />
+      <span className="text-xs font-mono text-[var(--text-primary)] tabular-nums">
+        {time}
+      </span>
+    </div>
+  );
+}
 
 interface User {
   id: string;
@@ -118,12 +151,17 @@ export default function Dashboard() {
     setDays([]);
   };
 
-  const createDay = async (date: string, startTime: string = '09:00', endTime: string = '22:00') => {
+  const createDay = async (
+    date: string, 
+    startTime: string = '09:00', 
+    endTime: string = '22:00',
+    sleepData?: { sleepTime?: string; wakeTime?: string; sleepDuration?: number; sleepQuality?: SleepQuality }
+  ) => {
     try {
       const res = await fetch('/api/days', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date, startTime, endTime }),
+        body: JSON.stringify({ date, startTime, endTime, ...sleepData }),
       });
       if (res.ok) {
         const day: Day = await res.json();
@@ -232,6 +270,40 @@ export default function Dashboard() {
   if (!user) {
     return (
         <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4 overflow-hidden relative">
+          {/* ACTION > WORDS - Split Vertical Text */}
+          {/* Left side - ACTION */}
+          <div className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 flex flex-col gap-3 select-none pointer-events-none">
+            {'ACTION'.split('').map((letter, i) => (
+              <span 
+                key={i} 
+                className="text-3xl sm:text-5xl font-black text-amber-400/30"
+                style={{ animationDelay: `${i * 0.1}s` }}
+              >
+                {letter}
+              </span>
+            ))}
+          </div>
+
+          {/* Center - Giant > symbol */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+            <span className="text-[20rem] sm:text-[28rem] font-black text-yellow-500/10 leading-none">
+              &gt;
+            </span>
+          </div>
+
+          {/* Right side - WORDS */}
+          <div className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 flex flex-col gap-3 select-none pointer-events-none">
+            {'WORDS'.split('').map((letter, i) => (
+              <span 
+                key={i} 
+                className="text-3xl sm:text-5xl font-black text-amber-400/20"
+                style={{ animationDelay: `${i * 0.1}s` }}
+              >
+                {letter}
+              </span>
+            ))}
+          </div>
+
           {/* Floating Orbs Background */}
           <div className="absolute inset-0 overflow-hidden">
             {/* Orb 1 - Large Blue */}
@@ -293,12 +365,10 @@ export default function Dashboard() {
               <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-cyan-500/10 rounded-3xl blur-xl opacity-50" />
               
               <div className="relative">
-                {/* Logo/Icon */}
+                {/* Logo/Icon - F∞ inspired */}
                 <div className="flex justify-center mb-6">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
-                    <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center shadow-lg shadow-purple-500/25">
+                    <span className="text-2xl font-black text-white">F∞</span>
                   </div>
                 </div>
 
@@ -463,8 +533,8 @@ export default function Dashboard() {
       {showNewDayModal && (
         <NewDayModal 
           onClose={() => setShowNewDayModal(false)}
-          onCreate={(date, startTime, endTime) => {
-            createDay(date, startTime, endTime);
+          onCreate={(date, startTime, endTime, sleepData) => {
+            createDay(date, startTime, endTime, sleepData);
             setShowNewDayModal(false);
           }}
           existingDates={days.map(d => d.date)}
@@ -473,7 +543,10 @@ export default function Dashboard() {
 
       <div className="max-w-3xl mx-auto px-4 py-6 pt-20">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h2 className="text-xl font-bold text-[var(--text-primary)]">Your Days</h2>
+            <div className="flex items-center gap-4">
+              <h2 className="text-xl font-bold text-[var(--text-primary)]">Your Days</h2>
+              <LiveClock />
+            </div>
             <div className="flex gap-2 w-full sm:w-auto">
                 <button
                   onClick={() => handleExport('json')}
@@ -532,28 +605,82 @@ export default function Dashboard() {
   );
 }
 
-// New Day Modal Component (Updated with CSS variables)
+// Sleep quality options for dropdown
+const SLEEP_QUALITY_OPTIONS: { value: SleepQuality; label: string; emoji: string }[] = [
+  { value: 'DEEP', label: 'Deep Sleep', emoji: '😴' },
+  { value: 'GOOD', label: 'Good', emoji: '😊' },
+  { value: 'LIGHT', label: 'Light', emoji: '💤' },
+  { value: 'RESTLESS', label: 'Restless', emoji: '😵‍💫' },
+  { value: 'POOR', label: 'Poor', emoji: '😫' },
+];
+
+// Helper to calculate sleep duration
+function calculateSleepDuration(sleepTime: string, wakeTime: string): number | null {
+  if (!sleepTime || !wakeTime) return null;
+  const [sleepH, sleepM] = sleepTime.split(':').map(Number);
+  const [wakeH, wakeM] = wakeTime.split(':').map(Number);
+  
+  const sleepMinutes = sleepH * 60 + sleepM;
+  let wakeMinutes = wakeH * 60 + wakeM;
+  
+  // If wake time is earlier than sleep time, assume next day
+  if (wakeMinutes <= sleepMinutes) {
+    wakeMinutes += 24 * 60;
+  }
+  
+  const durationMinutes = wakeMinutes - sleepMinutes;
+  return Math.round((durationMinutes / 60) * 10) / 10; // Round to 1 decimal
+}
+
+// New Day Modal Component with Sleep Tracking
 function NewDayModal({ 
   onClose, 
   onCreate, 
   existingDates 
 }: { 
   onClose: () => void; 
-  onCreate: (date: string, startTime: string, endTime: string) => void;
+  onCreate: (
+    date: string, 
+    startTime: string, 
+    endTime: string,
+    sleepData?: { sleepTime?: string; wakeTime?: string; sleepDuration?: number; sleepQuality?: SleepQuality }
+  ) => void;
   existingDates: string[];
 }) {
   const [selectedDate, setSelectedDate] = useState(getTodayDate());
   const [startTime, setStartTime] = useState('09:00');
   const [endTime, setEndTime] = useState('22:00');
+  
+  // Sleep tracking state
+  const [sleepTime, setSleepTime] = useState('');
+  const [wakeTime, setWakeTime] = useState('');
+  const [sleepQuality, setSleepQuality] = useState<SleepQuality | ''>('');
+  const [showSleepSection, setShowSleepSection] = useState(false);
+  
   const dateExists = existingDates.includes(selectedDate);
   const isValidTime = startTime < endTime;
+  
+  // Auto-calculate sleep duration
+  const sleepDuration = calculateSleepDuration(sleepTime, wakeTime);
+
+  const handleCreate = () => {
+    const sleepData = showSleepSection ? {
+      sleepTime: sleepTime || undefined,
+      wakeTime: wakeTime || undefined,
+      sleepDuration: sleepDuration || undefined,
+      sleepQuality: sleepQuality || undefined,
+    } : undefined;
+    
+    onCreate(selectedDate, startTime, endTime, sleepData);
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-      <div className="bg-[var(--bg-secondary)] rounded-2xl p-6 w-full max-w-md border border-[var(--border-primary)] shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4 overflow-y-auto py-4">
+      <div className="bg-[var(--bg-secondary)] rounded-2xl p-6 w-full max-w-md border border-[var(--border-primary)] shadow-xl my-auto">
         <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Create New Day</h2>
         
         <div className="space-y-4">
+          {/* Date Selection */}
           <div>
             <label className="block text-sm text-[var(--text-secondary)] mb-2">Select Date</label>
             <input
@@ -567,6 +694,7 @@ function NewDayModal({
             )}
           </div>
 
+          {/* Day Time Window */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-[var(--text-secondary)] mb-2">Start Time</label>
@@ -591,6 +719,7 @@ function NewDayModal({
             <p className="text-xs text-red-400">End time must be after start time</p>
           )}
 
+          {/* Quick Date Buttons */}
           <div className="flex gap-2">
             <button
               onClick={() => setSelectedDate(getTodayDate())}
@@ -619,6 +748,86 @@ function NewDayModal({
               Yesterday
             </button>
           </div>
+
+          {/* Sleep Tracking Section */}
+          <div className="border-t border-[var(--border-primary)] pt-4">
+            <button
+              type="button"
+              onClick={() => setShowSleepSection(!showSleepSection)}
+              className="flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              <span className="text-lg">😴</span>
+              <span>Track Sleep</span>
+              <svg 
+                className={`w-4 h-4 transition-transform ${showSleepSection ? 'rotate-180' : ''}`} 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            {showSleepSection && (
+              <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                {/* Sleep & Wake Times */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-[var(--text-secondary)] mb-2">🌙 Bedtime</label>
+                    <input
+                      type="time"
+                      value={sleepTime}
+                      onChange={(e) => setSleepTime(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-[var(--bg-tertiary)] border border-[var(--border-primary)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-blue)]"
+                      placeholder="23:00"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-[var(--text-secondary)] mb-2">☀️ Wake Time</label>
+                    <input
+                      type="time"
+                      value={wakeTime}
+                      onChange={(e) => setWakeTime(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-[var(--bg-tertiary)] border border-[var(--border-primary)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-blue)]"
+                      placeholder="07:00"
+                    />
+                  </div>
+                </div>
+                
+                {/* Auto-calculated Duration */}
+                {sleepDuration !== null && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-[var(--text-secondary)]">Sleep Duration:</span>
+                    <span className={`font-medium ${
+                      sleepDuration >= 7 ? 'text-green-400' : 
+                      sleepDuration >= 5 ? 'text-amber-400' : 
+                      'text-red-400'
+                    }`}>
+                      {sleepDuration} hours
+                    </span>
+                    {sleepDuration >= 7 && <span>✨</span>}
+                  </div>
+                )}
+                
+                {/* Sleep Quality Dropdown */}
+                <div>
+                  <label className="block text-sm text-[var(--text-secondary)] mb-2">Sleep Quality</label>
+                  <select
+                    value={sleepQuality}
+                    onChange={(e) => setSleepQuality(e.target.value as SleepQuality | '')}
+                    className="w-full px-4 py-2.5 bg-[var(--bg-tertiary)] border border-[var(--border-primary)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-blue)] appearance-none cursor-pointer"
+                  >
+                    <option value="">Select quality...</option>
+                    {SLEEP_QUALITY_OPTIONS.map(opt => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.emoji} {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex justify-end gap-3 mt-6">
@@ -629,7 +838,7 @@ function NewDayModal({
             Cancel
           </button>
           <button
-            onClick={() => onCreate(selectedDate, startTime, endTime)}
+            onClick={handleCreate}
             disabled={dateExists || !isValidTime}
             className="px-4 py-2 text-sm font-medium accent-notion text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
