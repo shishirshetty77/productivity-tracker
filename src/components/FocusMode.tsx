@@ -315,28 +315,25 @@ export default function FocusMode({ currentBlock, onClose, onComplete }: FocusMo
   // Input change handlers with validation
   const handleHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (inputsDisabled) return;
+    // Allow free typing - only keep digits, max 2 chars
     const val = e.target.value.replace(/\D/g, '').slice(0, 2);
-    let num = parseInt(val) || 0;
-    if (num > 48) num = 48;
-    setHoursInput(num.toString().padStart(val.length > 0 ? val.length : 1, '0'));
+    setHoursInput(val);
     if (timerState === 'IDLE' || timerState === 'CANCELLED') setTimerState('READY');
   };
 
   const handleMinutesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (inputsDisabled) return;
+    // Allow free typing - only keep digits, max 2 chars
     const val = e.target.value.replace(/\D/g, '').slice(0, 2);
-    let num = parseInt(val) || 0;
-    if (num > 59) num = 59;
-    setMinutesInput(num.toString().padStart(val.length > 0 ? val.length : 1, '0'));
+    setMinutesInput(val);
     if (timerState === 'IDLE' || timerState === 'CANCELLED') setTimerState('READY');
   };
 
   const handleSecondsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (inputsDisabled) return;
+    // Allow free typing - only keep digits, max 2 chars
     const val = e.target.value.replace(/\D/g, '').slice(0, 2);
-    let num = parseInt(val) || 0;
-    if (num > 59) num = 59;
-    setSecondsInput(num.toString().padStart(val.length > 0 ? val.length : 1, '0'));
+    setSecondsInput(val);
     if (timerState === 'IDLE' || timerState === 'CANCELLED') setTimerState('READY');
   };
 
