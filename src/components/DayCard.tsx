@@ -16,7 +16,6 @@ const SLEEP_QUALITY_INFO: Record<SleepQuality, { emoji: string; label: string; c
 };
 
 // Collapsible group component for time periods
-// Collapsible group component for time periods
 interface TimeBlockGroupProps {
   label: string;
   icon: string;
@@ -103,6 +102,14 @@ interface DayCardProps {
   onDelete: () => void;
 }
 
+// Define time periods
+type Period = 'morning' | 'afternoon' | 'evening';
+const PERIODS: { key: Period; label: string; icon: string; start: string; end: string }[] = [
+  { key: 'morning', label: 'Morning', icon: '🌤️', start: '00:00', end: '12:00' },
+  { key: 'afternoon', label: 'Afternoon', icon: '☀️', start: '12:00', end: '17:00' },
+  { key: 'evening', label: 'Evening', icon: '🌙', start: '17:00', end: '24:00' },
+];
+
 export default function DayCard({
   day,
   isExpanded,
@@ -134,21 +141,13 @@ export default function DayCard({
     }, 60000);
     return () => clearInterval(interval);
   }, [isToday]);
-  
-  // Define time periods
-  type Period = 'morning' | 'afternoon' | 'evening';
-  const periods: { key: Period; label: string; icon: string; start: string; end: string }[] = [
-    { key: 'morning', label: 'Morning', icon: '🌤️', start: '00:00', end: '12:00' },
-    { key: 'afternoon', label: 'Afternoon', icon: '☀️', start: '12:00', end: '17:00' },
-    { key: 'evening', label: 'Evening', icon: '🌙', start: '17:00', end: '24:00' },
-  ];
 
   // Determine current period
-  const getCurrentPeriod = () => {
+  const getCurrentPeriod = useCallback(() => {
     if (!isToday) return 'morning'; // Default to morning for past days
-    const time = getCurrentTimeString();
-    return periods.find(p => time >= p.start && time < p.end)?.key || 'morning';
-  };
+    const time = currentTime; 
+    return PERIODS.find(p => time >= p.start && time < p.end)?.key || 'morning';
+  }, [isToday, currentTime]);
 
   // State for expanded accordion group - defaults to current period only
   const [expandedPeriod, setExpandedPeriod] = useState<Period | null>(() => getCurrentPeriod() as Period);
@@ -157,11 +156,10 @@ export default function DayCard({
   useEffect(() => {
       if (isExpanded && isToday) {
           const current = getCurrentPeriod();
-          if (current !== expandedPeriod) {
-            setExpandedPeriod(current as Period);
-          }
+          // eslint-disable-next-line react-hooks/exhaustive-deps
+          setExpandedPeriod(prev => (prev === current ? prev : (current as Period)));
       }
-  }, [isExpanded, isToday]); // Intentionally not including expandedPeriod to avoid loops, just on open
+  }, [isExpanded, isToday, getCurrentPeriod]); // Intentionally not including expandedPeriod to avoid loops, just on open
 
   
   // Find current block index
@@ -348,7 +346,7 @@ export default function DayCard({
             {(() => {
               
               // Group blocks by period
-              const groupedBlocks = periods.map(period => ({
+              const groupedBlocks = PERIODS.map(period => ({
                 ...period,
                 blocks: day.timeBlocks.filter(block => 
                   block.startTime >= period.start && block.startTime < period.end
@@ -360,7 +358,7 @@ export default function DayCard({
               
               const currentPeriodKey = getCurrentPeriod();
 
-              return groupedBlocks.map((group, groupIndex) => {
+              return groupedBlocks.map((group) => {
                 const completedInGroup = group.blocks.filter(b => b.done).length;
                 const isCurrentPeriod = isToday && group.key === currentPeriodKey;
                 const isGroupExpanded = expandedPeriod === group.key;
