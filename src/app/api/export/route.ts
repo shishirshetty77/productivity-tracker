@@ -91,6 +91,13 @@ interface DayWithBlocks {
 function generateMarkdown(days: DayWithBlocks[]): string {
   let markdown = '# Productivity Log\n\n';
 
+  // Helper map for rating formatting
+  const RATING_MAP: Record<string, string> = {
+    'PRODUCTIVE': '🟢 Productive',
+    'MODERATE': '🟡 Moderate',
+    'DISTRACTED': '🔴 Distracted'
+  };
+
   for (const day of days) {
     markdown += `## Date: ${day.date}\n\n`;
     markdown += `- Day Window: ${day.startTime}–${day.endTime}\n`;
@@ -107,11 +114,17 @@ function generateMarkdown(days: DayWithBlocks[]): string {
     
     markdown += `\n### Time Blocks\n\n`;
 
+    // Table Header
+    markdown += `| Time | Status | Rating | Activity |\n`;
+    markdown += `|------|--------|--------|----------|\n`;
+
     for (const block of day.timeBlocks) {
       const status = block.done ? '✅ Done' : block.skipped ? '⏭️ Skipped' : '⬜ Pending';
-      const rating = block.rating ? `[${block.rating}] ` : '';
-      const activity = block.activity || '(no activity logged)';
-      markdown += `- ${block.startTime}–${block.endTime} | ${status} ${rating}| ${activity}\n`;
+      // Format rating with emoji or empty dash
+      const rating = block.rating ? (RATING_MAP[block.rating] || block.rating) : '-';
+      const activity = block.activity ? block.activity.replace(/\|/g, '-') : ''; // Escape pipe chars in activity
+
+      markdown += `| ${block.startTime}–${block.endTime} | ${status} | ${rating} | ${activity} |\n`;
     }
 
     markdown += '\n---\n\n';

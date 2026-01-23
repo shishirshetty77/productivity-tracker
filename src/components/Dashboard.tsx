@@ -286,7 +286,7 @@ export default function Dashboard() {
 
           {/* Center - Giant > symbol */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-            <span className="text-[20rem] sm:text-[28rem] font-black text-yellow-500/10 leading-none">
+            <span className="text-[25vw] sm:text-[28rem] font-black text-yellow-500/10 leading-none">
               &gt;
             </span>
           </div>
