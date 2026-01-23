@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Day, TimeBlock, SleepQuality } from '@/types';
+import { Day, TimeBlock, SleepQuality, BlockRating } from '@/types';
 import { getTodayDate } from '@/lib/utils';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import DayCard from '@/components/DayCard';
@@ -35,9 +35,9 @@ function LiveClock() {
   if (!time) return null;
 
   return (
-    <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-[var(--bg-tertiary)] rounded-lg">
-      <Clock size={14} className="text-[var(--text-secondary)]" />
-      <span className="text-xs font-mono text-[var(--text-primary)] tabular-nums">
+    <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-full shadow-[0_4px_20px_-1px_rgba(0,0,0,0.2)] hover:bg-white/[0.05] transition-colors duration-300 group">
+      <Clock size={15} className="text-white/50 group-hover:text-blue-400 transition-colors duration-300" />
+      <span className="text-xs font-medium text-white/80 tracking-wide tabular-nums font-sans">
         {time}
       </span>
     </div>
@@ -174,13 +174,13 @@ export default function Dashboard() {
     }
   };
   
-  const saveTimeBlock = useCallback(async (data: { id: string; done?: boolean; activity?: string }) => {
+  const saveTimeBlock = useCallback(async (data: { id: string; done?: boolean; activity?: string; rating?: BlockRating | null }) => {
     setSaveStatus('saving');
     try {
       const res = await fetch(`/api/timeblocks/${data.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ done: data.done, activity: data.activity }),
+        body: JSON.stringify({ done: data.done, activity: data.activity, rating: data.rating }),
       });
       if (res.ok) {
         setSaveStatus('saved');
@@ -196,7 +196,7 @@ export default function Dashboard() {
 
   const { save: debouncedSave } = useAutoSave(saveTimeBlock, 400);
 
-  const handleTimeBlockUpdate = (dayId: string, blockId: string, data: { done?: boolean; activity?: string }) => {
+  const handleTimeBlockUpdate = (dayId: string, blockId: string, data: { done?: boolean; activity?: string; rating?: BlockRating | null }) => {
     setDays(prev => prev.map(day => 
       day.id === dayId 
         ? { ...day, timeBlocks: day.timeBlocks.map(block => 
@@ -286,7 +286,7 @@ export default function Dashboard() {
 
           {/* Center - Giant > symbol */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-            <span className="text-[20rem] sm:text-[28rem] font-black text-yellow-500/10 leading-none">
+            <span className="text-[25vw] sm:text-[28rem] font-black text-yellow-500/10 leading-none">
               &gt;
             </span>
           </div>
