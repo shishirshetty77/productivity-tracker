@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Day, TimeBlock, SleepQuality } from '@/types';
+import { Day, TimeBlock, SleepQuality, BlockRating } from '@/types';
 import { getTodayDate } from '@/lib/utils';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import DayCard from '@/components/DayCard';
@@ -174,13 +174,13 @@ export default function Dashboard() {
     }
   };
   
-  const saveTimeBlock = useCallback(async (data: { id: string; done?: boolean; activity?: string }) => {
+  const saveTimeBlock = useCallback(async (data: { id: string; done?: boolean; activity?: string; rating?: BlockRating | null }) => {
     setSaveStatus('saving');
     try {
       const res = await fetch(`/api/timeblocks/${data.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ done: data.done, activity: data.activity }),
+        body: JSON.stringify({ done: data.done, activity: data.activity, rating: data.rating }),
       });
       if (res.ok) {
         setSaveStatus('saved');
@@ -196,7 +196,7 @@ export default function Dashboard() {
 
   const { save: debouncedSave } = useAutoSave(saveTimeBlock, 400);
 
-  const handleTimeBlockUpdate = (dayId: string, blockId: string, data: { done?: boolean; activity?: string }) => {
+  const handleTimeBlockUpdate = (dayId: string, blockId: string, data: { done?: boolean; activity?: string; rating?: BlockRating | null }) => {
     setDays(prev => prev.map(day => 
       day.id === dayId 
         ? { ...day, timeBlocks: day.timeBlocks.map(block => 
