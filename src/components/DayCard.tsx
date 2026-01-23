@@ -16,13 +16,15 @@ const SLEEP_QUALITY_INFO: Record<SleepQuality, { emoji: string; label: string; c
 };
 
 // Collapsible group component for time periods
+// Collapsible group component for time periods
 interface TimeBlockGroupProps {
   label: string;
   icon: string;
   completedCount: number;
   totalCount: number;
   isCurrentPeriod: boolean;
-  defaultExpanded: boolean;
+  isExpanded: boolean;
+  onToggle: () => void;
   children: ReactNode;
 }
 
@@ -32,17 +34,17 @@ function TimeBlockGroup({
   completedCount, 
   totalCount, 
   isCurrentPeriod,
-  defaultExpanded,
+  isExpanded,
+  onToggle,
   children 
 }: TimeBlockGroupProps) {
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
   
   return (
     <div className="border-b border-[var(--border-primary)] last:border-b-0">
       {/* Group Header */}
       <button
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={onToggle}
         className={`w-full px-4 sm:px-5 py-3 flex items-center justify-between hover:bg-[var(--card-hover)] transition-colors ${
           isCurrentPeriod ? 'bg-[var(--accent-blue)]/5' : ''
         }`}
@@ -132,6 +134,35 @@ export default function DayCard({
     }, 60000);
     return () => clearInterval(interval);
   }, [isToday]);
+  
+  // Define time periods
+  type Period = 'morning' | 'afternoon' | 'evening';
+  const periods: { key: Period; label: string; icon: string; start: string; end: string }[] = [
+    { key: 'morning', label: 'Morning', icon: '🌤️', start: '00:00', end: '12:00' },
+    { key: 'afternoon', label: 'Afternoon', icon: '☀️', start: '12:00', end: '17:00' },
+    { key: 'evening', label: 'Evening', icon: '🌙', start: '17:00', end: '24:00' },
+  ];
+
+  // Determine current period
+  const getCurrentPeriod = () => {
+    if (!isToday) return 'morning'; // Default to morning for past days
+    const time = getCurrentTimeString();
+    return periods.find(p => time >= p.start && time < p.end)?.key || 'morning';
+  };
+
+  // State for expanded accordion group - defaults to current period only
+  const [expandedPeriod, setExpandedPeriod] = useState<Period | null>(() => getCurrentPeriod() as Period);
+
+  // Update expanded period when day becomes expaned (only if not already set)
+  useEffect(() => {
+      if (isExpanded && isToday) {
+          const current = getCurrentPeriod();
+          if (current !== expandedPeriod) {
+            setExpandedPeriod(current as Period);
+          }
+      }
+  }, [isExpanded, isToday]); // Intentionally not including expandedPeriod to avoid loops, just on open
+
   
   // Find current block index
   const currentBlockIndex = isToday ? day.timeBlocks.findIndex(block => 
@@ -315,13 +346,6 @@ export default function DayCard({
           >
             {/* Group time blocks by period */}
             {(() => {
-              // Define time periods
-              type Period = 'morning' | 'afternoon' | 'evening';
-              const periods: { key: Period; label: string; icon: string; start: string; end: string }[] = [
-                { key: 'morning', label: 'Morning', icon: '🌤️', start: '00:00', end: '12:00' },
-                { key: 'afternoon', label: 'Afternoon', icon: '☀️', start: '12:00', end: '17:00' },
-                { key: 'evening', label: 'Evening', icon: '🌙', start: '17:00', end: '24:00' },
-              ];
               
               // Group blocks by period
               const groupedBlocks = periods.map(period => ({
@@ -334,15 +358,13 @@ export default function DayCard({
                 }))
               })).filter(group => group.blocks.length > 0);
               
-              // Determine which period the current time is in
-              const currentPeriod = periods.find(p => 
-                currentTime >= p.start && currentTime < p.end
-              )?.key;
-              
+              const currentPeriodKey = getCurrentPeriod();
+
               return groupedBlocks.map((group, groupIndex) => {
                 const completedInGroup = group.blocks.filter(b => b.done).length;
-                const isCurrentPeriod = isToday && group.key === currentPeriod;
-                
+                const isCurrentPeriod = isToday && group.key === currentPeriodKey;
+                const isGroupExpanded = expandedPeriod === group.key;
+
                 return (
                   <TimeBlockGroup
                     key={group.key}
@@ -351,7 +373,8 @@ export default function DayCard({
                     completedCount={completedInGroup}
                     totalCount={group.blocks.length}
                     isCurrentPeriod={isCurrentPeriod}
-                    defaultExpanded={isCurrentPeriod || groupIndex === 0}
+                    isExpanded={isGroupExpanded}
+                    onToggle={() => setExpandedPeriod(isGroupExpanded ? null : group.key as Period)}
                   >
                     {group.blocks.map((block) => (
                       <div key={block.id} data-block-index={block.originalIndex}>
