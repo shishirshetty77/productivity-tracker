@@ -13,7 +13,26 @@ interface TimeBlockItemProps {
   isFirst: boolean;
   isLast: boolean;
   isCurrent?: boolean;
-  onUpdate: (id: string, data: { done?: boolean; skipped?: boolean; activity?: string }) => void;
+  onUpdate: (id: string, data: { done?: boolean; skipped?: boolean; activity?: string; rating?: BlockRating | null }) => void;
+  onNavigate: (direction: 'up' | 'down') => void;
+}
+
+import { BlockRating } from '@/types';
+import RatingDropdown, { RATINGS } from './RatingDropdown';
+
+interface TimeBlockItemProps {
+  id: string;
+  startTime: string;
+  endTime: string;
+  done: boolean;
+  skipped: boolean;
+  activity: string;
+  rating?: BlockRating | null; 
+  index: number;
+  isFirst: boolean;
+  isLast: boolean;
+  isCurrent?: boolean;
+  onUpdate: (id: string, data: { done?: boolean; skipped?: boolean; activity?: string; rating?: BlockRating | null }) => void;
   onNavigate: (direction: 'up' | 'down') => void;
 }
 
@@ -24,6 +43,7 @@ export default function TimeBlockItem({
   done,
   skipped,
   activity,
+  rating,
   index,
   isCurrent = false,
   onUpdate,
@@ -51,54 +71,47 @@ export default function TimeBlockItem({
       e.preventDefault();
       onNavigate('down');
     } else if (e.key === 'Enter' && !e.shiftKey) {
+        // Removed default done toggle on enter to avoid confusion with ratings
+        // But we could map it to "PRODUCTIVE" if desired. For now let's just keep navigate behavior cleanly.
         e.preventDefault();
-        onUpdate(id, { done: !done });
+        onNavigate('down');
     }
   };
 
+  // Determine row style based on rating or legacy state
+  let rowStyle = 'hover:bg-[var(--card-hover)]';
+  if (rating === 'PRODUCTIVE') rowStyle = 'bg-green-500/10 border-green-500/20';
+  else if (rating === 'MODERATE') rowStyle = 'bg-yellow-500/10 border-yellow-500/20';
+  else if (rating === 'DISTRACTED') rowStyle = 'bg-red-500/10 border-red-500/20';
+  else if (done) rowStyle = 'bg-green-900/10'; // Legacy fallback
+  else if (skipped) rowStyle = 'bg-gray-800/30'; // Legacy fallback
+
+  if (isCurrent) {
+     rowStyle = 'bg-[var(--accent-blue)]/10 border border-[var(--accent-blue)]/30 shadow-[0_0_10px_var(--accent-blue)/20]';
+  }
+
   return (
     <div 
-        className={`group flex items-start gap-2 sm:gap-3 p-1.5 sm:p-2 rounded-lg transition-all duration-200 ${
-            isCurrent 
-              ? 'bg-[var(--accent-blue)]/10 border border-[var(--accent-blue)]/30 shadow-[0_0_10px_var(--accent-blue)/20]' 
-              : done 
-                ? 'bg-green-900/10' 
-                : skipped 
-                  ? 'bg-gray-800/30' 
-                  : 'hover:bg-[var(--card-hover)]'
-        }`}
+        className={`group flex items-start gap-2 sm:gap-3 p-1.5 sm:p-2 rounded-lg transition-all duration-200 border border-transparent ${rowStyle}`}
     >
       <div className="flex flex-col items-center gap-1 mt-1.5">
-          <div 
-            onClick={() => onUpdate(id, { done: !done })}
-            className={`w-5 h-5 rounded-md border cursor-pointer flex items-center justify-center transition-all duration-200 ${
-                done 
-                ? 'bg-green-500 border-green-500 text-white' 
-                : 'border-[var(--border-primary)] hover:border-[var(--text-secondary)]'
-            }`}
-          >
-            {done && (
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                </svg>
-            )}
-          </div>
-          
-          <button
-             onClick={() => onUpdate(id, { skipped: !skipped })}
-             className={`p-1 rounded hover:bg-[var(--bg-tertiary)] transition-colors ${skipped ? 'text-amber-500' : 'text-[var(--text-secondary)]/50 group-hover:text-[var(--text-secondary)]'}`}
-             title="Skip block"
-          >
-             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-             </svg>
-          </button>
+          <RatingDropdown 
+            currentRating={rating}
+            onRate={(newRating) => {
+                onUpdate(id, { 
+                    rating: newRating,
+                    // Auto-update legacy flags for backward compatibility
+                    done: newRating === 'PRODUCTIVE' || newRating === 'MODERATE',
+                    skipped: newRating === 'DISTRACTED'
+                });
+            }}
+          />
       </div>
 
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline justify-between mb-0.5 sm:mb-1">
             <span className={`text-[10px] sm:text-xs font-mono font-medium ${
-                done ? 'text-green-500/80' : skipped ? 'text-gray-500' : 'text-[var(--text-secondary)]'
+                rating ? RATINGS.find(r => r.value === rating)?.color : 'text-[var(--text-secondary)]'
             }`}>
                 {startTime} - {endTime}
             </span>
@@ -111,9 +124,12 @@ export default function TimeBlockItem({
             onKeyDown={handleKeyDown}
             data-input-index={index}
             rows={1}
-            placeholder={skipped ? "Marked as skipped" : "What did you do?"}
+            placeholder={rating === 'DISTRACTED' ? "What distracted you?" : "What did you do?"}
             className={`w-full bg-transparent resize-none focus:outline-none text-sm transition-colors decoration-gray-600 ${
-                done ? 'text-[var(--text-secondary)] line-through' : skipped ? 'text-gray-600 italic' : 'text-[var(--text-primary)] placeholder-[var(--text-placeholder)]'
+                rating === 'PRODUCTIVE' || done ? 'text-[var(--text-secondary)]' : 
+                rating === 'DISTRACTED' ? 'text-red-300/80' : 
+                skipped ? 'text-gray-600 italic' : 
+                'text-[var(--text-primary)] placeholder-[var(--text-placeholder)]'
             }`}
         />
       </div>

@@ -38,6 +38,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         done: done ?? existingBlock.done,
         skipped: skipped ?? existingBlock.skipped,
         activity: activity ?? existingBlock.activity,
+        rating: body.rating, // Allow explicit null for clearing rating
       },
     });
 

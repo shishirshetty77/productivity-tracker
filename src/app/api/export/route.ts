@@ -53,6 +53,7 @@ export async function GET(request: NextRequest) {
         done: block.done,
         skipped: block.skipped,
         activity: block.activity,
+        rating: block.rating,
       })),
     }));
 
@@ -83,6 +84,7 @@ interface DayWithBlocks {
     done: boolean;
     skipped: boolean;
     activity: string;
+    rating?: string | null;
   }[];
 }
 
@@ -107,8 +109,9 @@ function generateMarkdown(days: DayWithBlocks[]): string {
 
     for (const block of day.timeBlocks) {
       const status = block.done ? '✅ Done' : block.skipped ? '⏭️ Skipped' : '⬜ Pending';
+      const rating = block.rating ? `[${block.rating}] ` : '';
       const activity = block.activity || '(no activity logged)';
-      markdown += `- ${block.startTime}–${block.endTime} | ${status} | ${activity}\n`;
+      markdown += `- ${block.startTime}–${block.endTime} | ${status} ${rating}| ${activity}\n`;
     }
 
     markdown += '\n---\n\n';

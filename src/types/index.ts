@@ -6,7 +6,10 @@ export interface TimeBlock {
   skipped: boolean;
   activity: string;
   dayId: string;
+  rating?: BlockRating | null;
 }
+
+export type BlockRating = 'PRODUCTIVE' | 'MODERATE' | 'DISTRACTED';
 
 export interface Day {
   id: string;
@@ -50,6 +53,7 @@ export interface UpdateTimeBlockRequest {
   done?: boolean;
   skipped?: boolean;
   activity?: string;
+  rating?: BlockRating | null;
 }
 
 export type ExportFormat = 'json' | 'markdown';

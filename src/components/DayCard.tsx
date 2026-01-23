@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect, ReactNode } from 'react';
-import { Day, SleepQuality } from '@/types';
+import { Day, SleepQuality, BlockRating } from '@/types';
 import { getTodayDate, calculateCompletionPercentage } from '@/lib/utils';
 import TimeBlockItem from './TimeBlockItem';
 import { ChevronDown, Moon } from 'lucide-react';
@@ -96,7 +96,7 @@ interface DayCardProps {
   day: Day;
   isExpanded: boolean;
   onToggleExpand: () => void;
-  onUpdateBlock: (blockId: string, data: { done?: boolean; skipped?: boolean; activity?: string }) => void;
+  onUpdateBlock: (blockId: string, data: { done?: boolean; skipped?: boolean; activity?: string; rating?: BlockRating | null }) => void;
   onToggleCompleted: () => void;
   onDelete: () => void;
 }
@@ -364,6 +364,7 @@ export default function DayCard({
                           activity={block.activity}
                           onUpdate={onUpdateBlock}
                           index={block.originalIndex}
+                          rating={block.rating}
                           isFirst={block.originalIndex === 0}
                           isLast={block.originalIndex === day.timeBlocks.length - 1}
                           onNavigate={(direction) => handleNavigate(block.originalIndex, direction)}
