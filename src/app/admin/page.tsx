@@ -35,7 +35,7 @@ export default async function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-primary)]">
-                {users.map((user) => (
+                {users.map((user: { id: string; username: string; role: string; createdAt: Date; _count: { days: number } }) => (
                   <tr key={user.id} className="hover:bg-[var(--card-hover)] transition-colors">
                     <td className="px-6 py-4 font-medium text-[var(--text-primary)]">{user.username}</td>
                     <td className="px-6 py-4">

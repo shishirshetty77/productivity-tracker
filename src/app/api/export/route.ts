@@ -25,6 +25,13 @@ export async function GET(request: NextRequest) {
       orderBy: { date: 'asc' },
     });
 
+    const habits = await prisma.habit.findMany({
+        where: { userId: session.userId as string },
+        include: {
+            logs: { orderBy: { date: 'asc' } }
+        }
+    });
+
     if (format === 'markdown') {
       const markdown = generateMarkdown(days);
       return new NextResponse(markdown, {
@@ -36,7 +43,18 @@ export async function GET(request: NextRequest) {
     }
 
     // JSON format (LLM-friendly structure) - includes ALL data
-    const jsonData = days.map((day) => ({
+    const jsonData = {
+      habits: habits.map((h: { name: string; description: string | null; color: string; icon: string; type: string; goalFrequency: number; createdAt: Date; logs: { date: string; value: number }[] }) => ({
+        name: h.name,
+        description: h.description,
+        color: h.color,
+        icon: h.icon,
+        type: h.type,
+        goal_frequency: h.goalFrequency,
+        created_at: h.createdAt,
+        logs: h.logs.map((l: { date: string; value: number }) => ({ date: l.date, value: l.value }))
+      })),
+      days: days.map((day: { date: string; startTime: string; endTime: string; completed: boolean; sleepTime: string | null; wakeTime: string | null; sleepDuration: number | null; sleepQuality: string | null; timeBlocks: { startTime: string; endTime: string; done: boolean; skipped: boolean; activity: string; rating: string | null }[] }) => ({
       date: day.date,
       day_window: `${day.startTime}-${day.endTime}`,
       completed: day.completed,
@@ -47,7 +65,7 @@ export async function GET(request: NextRequest) {
         duration: day.sleepDuration || null,
         quality: day.sleepQuality || null,
       },
-      intervals: day.timeBlocks.map((block) => ({
+      intervals: day.timeBlocks.map((block: { startTime: string; endTime: string; done: boolean; skipped: boolean; activity: string; rating: string | null }) => ({
         start: block.startTime,
         end: block.endTime,
         done: block.done,
@@ -55,7 +73,8 @@ export async function GET(request: NextRequest) {
         activity: block.activity,
         rating: block.rating,
       })),
-    }));
+    }))
+    };
 
     return new NextResponse(JSON.stringify(jsonData, null, 2), {
       headers: {
