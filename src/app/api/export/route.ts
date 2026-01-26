@@ -44,13 +44,13 @@ export async function GET(request: NextRequest) {
 
     // JSON format (LLM-friendly structure) - includes ALL data
     const jsonData = {
-      habits: habits.map((h: { name: string; type: string; goalFrequency: number; logs: any[] }) => ({
+      habits: habits.map((h: { name: string; type: string; goalFrequency: number; logs: { date: string; value: number }[] }) => ({
         name: h.name,
         type: h.type,
         goal_frequency: h.goalFrequency,
         logs: h.logs.map((l: { date: string; value: number }) => ({ date: l.date, value: l.value }))
       })),
-      days: days.map((day: any) => ({
+      days: days.map((day: { date: string; startTime: string; endTime: string; completed: boolean; sleepTime?: string; wakeTime?: string; sleepDuration?: number; sleepQuality?: string; timeBlocks: { startTime: string; endTime: string; done: boolean; skipped: boolean; activity: string; rating?: string }[] }) => ({
       date: day.date,
       day_window: `${day.startTime}-${day.endTime}`,
       completed: day.completed,
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
         duration: day.sleepDuration || null,
         quality: day.sleepQuality || null,
       },
-      intervals: day.timeBlocks.map((block: any) => ({
+      intervals: day.timeBlocks.map((block: { startTime: string; endTime: string; done: boolean; skipped: boolean; activity: string; rating: string }) => ({
         start: block.startTime,
         end: block.endTime,
         done: block.done,

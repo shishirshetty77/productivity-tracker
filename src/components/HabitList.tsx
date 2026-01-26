@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Habit, HabitLog } from '@/types';
 import { Trash2, XCircle, Trophy } from 'lucide-react';
 import { clsx } from 'clsx';
-import { format, subDays, parseISO } from 'date-fns';
+import { format, subDays, parseISO, differenceInCalendarDays, startOfWeek, getDay, isAfter, isBefore } from 'date-fns';
 
 interface HabitListProps {
   habits: (Habit & { logs: HabitLog[] })[];
@@ -14,67 +14,57 @@ interface HabitListProps {
 
 export default function HabitList({ habits, onToggle, onDelete }: HabitListProps) {
   const [expandedHabit, setExpandedHabit] = useState<string | null>(null);
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date();
+  const todayStr = format(today, 'yyyy-MM-dd');
 
   const getAbstinenceStats = (logs: HabitLog[], createdAt: string) => {
-    // Sort logs descending (newest first)
+    const startDate = parseISO(createdAt);
     const sortedLogs = [...logs].sort((a, b) => b.date.localeCompare(a.date));
     
-    // 1. Current Streak
-    let streak = 0;
-    const checkDate = new Date();
-    // Start of habit (ignore time)
-    const startDate = parseISO(createdAt);
-    startDate.setHours(0, 0, 0, 0);
+    // Find most recent relapse...
+    const lastRelapse = sortedLogs.find(l => !isAfter(parseISO(l.date), today));
     
-    // Calculate streak going backwards
-    while (true) {
-        const checkTime = checkDate.getTime();
-        // Stop if we go before creation date
-        if (checkTime < startDate.getTime()) break;
-        
-        const dateStr = checkDate.toISOString().split('T')[0];
-        const hasRelapse = sortedLogs.some(l => l.date === dateStr);
-        
-        if (hasRelapse) {
-            break;
-        } else {
-            streak++;
+    let baseDate = startDate;
+    if (lastRelapse) {
+        const relapseDate = parseISO(lastRelapse.date);
+        if (isAfter(relapseDate, startDate) || relapseDate.getTime() === startDate.getTime()) {
+            baseDate = relapseDate; 
         }
-        checkDate.setDate(checkDate.getDate() - 1);
     }
-    
-    return { streak }; 
+
+    const streak = differenceInCalendarDays(today, baseDate);
+    return { streak: Math.max(0, streak) };
   };
 
-  const getLast365Days = () => {
-    const dates = [];
-    for (let i = 364; i >= 0; i--) {
-        dates.push(subDays(new Date(), i));
-    }
-    return dates;
+  const getHeatmapData = () => {
+     const today = new Date();
+     const daysToRender = [];
+     for(let i = 0; i < 365; i++) {
+        const d = subDays(today, 364 - i);
+        daysToRender.push(d);
+     }
+     return daysToRender;
   };
-
-  const heatmapDates = getLast365Days();
 
   return (
     <div className="space-y-4">
       {habits.map(habit => {
-        const stats = getAbstinenceStats(habit.logs, habit.createdAt); // createdAt needed from backend
-        // Note: habits prop needs to include createdAt. In Types, I need to check if Habit interface has it.
-        // It does in schema, but let's ensure API returns it.
-        const relapsedToday = habit.logs.some(l => l.date === today);
+        const stats = getAbstinenceStats(habit.logs, habit.createdAt);
+        const relapsedToday = habit.logs.some(l => l.date === todayStr);
         const isExpanded = expandedHabit === habit.id;
+        const creationDate = parseISO(habit.createdAt);
+
+        const heatmapDays = getHeatmapData();
+        const firstDayOfWeek = getDay(heatmapDays[0]); 
+        const paddedDays = Array(firstDayOfWeek).fill(null).concat(heatmapDays);
 
         return (
           <div key={habit.id} className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl overflow-hidden transition-all duration-300">
-            {/* Header / Summary */}
             <div className="p-4 flex items-center justify-between">
                 <div 
                     className="flex items-center gap-4 cursor-pointer flex-1"
                     onClick={() => setExpandedHabit(isExpanded ? null : habit.id)}
                 >
-                    {/* Icon Box */}
                     <div 
                         className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-inner"
                         style={{ backgroundColor: `${habit.color}15`, color: habit.color }}
@@ -82,39 +72,37 @@ export default function HabitList({ habits, onToggle, onDelete }: HabitListProps
                         {habit.icon}
                     </div>
 
-                    {/* Text Info */}
                     <div>
                         <h3 className="font-semibold text-[var(--text-primary)] text-lg">{habit.name}</h3>
                         <div className="flex items-center gap-3 text-sm mt-0.5">
                             <span className={clsx(
                                 "flex items-center gap-1.5 font-medium px-2 py-0.5 rounded-md",
-                                stats.streak > 0 ? "text-green-400 bg-green-400/10" : "text-red-400 bg-red-400/10"
+                                stats.streak > 0 ? "text-green-400 bg-green-400/10" : "text-[var(--text-secondary)] bg-[var(--bg-tertiary)]"
                             )}>
                                 {stats.streak > 0 ? (
                                     <><Trophy size={14} /> {stats.streak} Days Clean</>
                                 ) : (
-                                    <><XCircle size={14} /> Relapsed Today</>
+                                    <><XCircle size={14} /> Day 0</>
                                 )}
                             </span>
                         </div>
                         <p className="text-[10px] text-[var(--text-secondary)] mt-1">
-                            Started on {format(parseISO(habit.createdAt), 'MMM d, yyyy')}
+                            Started on {format(creationDate, 'MMM d, yyyy')}
                         </p>
                     </div>
                 </div>
 
-                {/* Relapse Button */}
                 <div className="flex items-center gap-4">
                     {!relapsedToday ? (
                         <button
-                            onClick={() => onToggle(habit.id, today)}
+                            onClick={() => onToggle(habit.id, todayStr)}
                             className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-lg text-sm font-medium transition-colors"
                         >
                             I Relapsed
                         </button>
                     ) : (
                         <button
-                            onClick={() => onToggle(habit.id, today)} 
+                            onClick={() => onToggle(habit.id, todayStr)} 
                             className="px-4 py-2 text-[var(--text-secondary)] text-xs hover:text-[var(--text-primary)]"
                         >
                             Undo
@@ -131,54 +119,61 @@ export default function HabitList({ habits, onToggle, onDelete }: HabitListProps
                 </div>
             </div>
 
-            {/* Expanded Heatmap */}
             {isExpanded && (
                 <div className="px-4 pb-6 animate-in slide-in-from-top-2 duration-200">
                     <div className="h-px w-full bg-[var(--border-primary)] mb-4" />
                     
-                    <h4 className="text-sm font-medium text-[var(--text-secondary)] mb-3">History (Last Year)</h4>
-                    
-                    <div className="flex flex-wrap gap-1">
-                        {heatmapDates.map((date) => {
-                            const dateStr = format(date, 'yyyy-MM-dd');
-                            const isRelapse = habit.logs.some(l => l.date === dateStr);
-                            const isFuture = date > new Date();
-                            const startDate = parseISO(habit.createdAt);
-                            startDate.setHours(0,0,0,0);
-                            
-                            // Check if before creation
-                            const isBeforeCreation = date < startDate;
-
-                            if (isFuture) return null;
-
-                            return (
-                                <div 
-                                    key={dateStr}
-                                    title={`${dateStr}: ${isBeforeCreation ? 'Not Tracked' : isRelapse ? 'Relapsed' : 'Clean'}`}
-                                    className={clsx(
-                                        "w-2.5 h-2.5 rounded-[2px] transition-colors",
-                                        isBeforeCreation ? "bg-black/20" : // Black (Dark Gray) for untracked
-                                        isRelapse ? "bg-red-500/50" : // Red for relapse
-                                        "bg-green-500/40 hover:bg-green-500/60" // Green for clean
-                                    )}
-                                />
-                            );
-                        })}
+                    <div className="flex justify-between items-end mb-2">
+                        <h4 className="text-sm font-medium text-[var(--text-secondary)]">Activity Graph</h4>
+                        <div className="flex gap-2 text-[10px] text-[var(--text-secondary)]">
+                            <span>Less</span>
+                            <div className="flex gap-0.5">
+                                <div className="w-2.5 h-2.5 bg-[#161b22] rounded-[2px]" />
+                                <div className="w-2.5 h-2.5 bg-green-900/40 rounded-[2px]" />
+                                <div className="w-2.5 h-2.5 bg-green-500/60 rounded-[2px]" />
+                                <div className="w-2.5 h-2.5 bg-green-400 rounded-[2px]" />
+                            </div>
+                            <span>More</span>
+                        </div>
                     </div>
                     
-                    <div className="flex items-center gap-4 mt-4 text-xs text-[var(--text-secondary)]">
-                        <div className="flex items-center gap-1.5">
-                           <div className="w-2.5 h-2.5 rounded-[2px] bg-black/20" />
-                           <span>Not Tracked</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-2.5 h-2.5 rounded-[2px] bg-green-500/40" />
-                            <span>Clean</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-2.5 h-2.5 rounded-[2px] bg-red-500/50" />
-                            <span>Relapse</span>
-                        </div>
+                    <div className="overflow-x-auto pb-2">
+                         <div className="min-w-fit flex text-[10px] text-[var(--text-secondary)] mb-1 gap-[calc(4*12px)]">
+                            {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(m => (
+                                <span key={m}>{m}</span>
+                            ))}
+                         </div>
+                         
+                         <div 
+                           className="grid grid-flow-col gap-[2px]" 
+                           style={{ gridTemplateRows: 'repeat(7, 10px)' }}
+                        >
+                             {paddedDays.map((date, i) => {
+                                 if (!date) return <div key={`empty-${i}`} className="w-2.5 h-2.5" />;
+                                 
+                                 const dateStr = format(date, 'yyyy-MM-dd');
+                                 const isRelapse = habit.logs.some(l => l.date === dateStr);
+                                 // Check if strictly before creation (so we paint it black/untracked)
+                                 const isUntracked = isBefore(date, startOfWeek(creationDate)) && differenceInCalendarDays(date, creationDate) < 0;
+
+                                 let colorClass = "bg-[#161b22]"; 
+                                 if (!isUntracked) {
+                                     if (isRelapse) colorClass = "bg-red-500";
+                                     else colorClass = "bg-green-500/80";
+                                 }
+
+                                 return (
+                                     <div 
+                                         key={dateStr}
+                                         title={`${dateStr}: ${isUntracked ? 'Untracked' : isRelapse ? 'Relapse' : 'Clean'}`}
+                                         className={clsx(
+                                             "w-2.5 h-2.5 rounded-[2px] transition-colors hover:ring-1 hover:ring-white/20",
+                                             colorClass
+                                         )}
+                                     />
+                                 );
+                             })}
+                         </div>
                     </div>
                 </div>
             )}
