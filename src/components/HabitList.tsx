@@ -12,13 +12,20 @@ interface HabitListProps {
   onDelete: (habitId: string) => void;
 }
 
+// Helper to safely parse dates that might be strings or Date objects
+const safeParseDate = (date: string | Date): Date => {
+    if (date instanceof Date) return date;
+    if (!date) return new Date(); // Fallback to now if missing
+    return parseISO(date);
+};
+
 export default function HabitList({ habits, onToggle, onDelete }: HabitListProps) {
   const [expandedHabit, setExpandedHabit] = useState<string | null>(null);
   const today = new Date();
   const todayStr = format(today, 'yyyy-MM-dd');
 
-  const getAbstinenceStats = (logs: HabitLog[], createdAt: string) => {
-    const startDate = parseISO(createdAt);
+  const getAbstinenceStats = (logs: HabitLog[], createdAt: string | Date) => {
+    const startDate = safeParseDate(createdAt);
     const sortedLogs = [...logs].sort((a, b) => b.date.localeCompare(a.date));
     
     // Find most recent relapse...
@@ -52,7 +59,7 @@ export default function HabitList({ habits, onToggle, onDelete }: HabitListProps
         const stats = getAbstinenceStats(habit.logs, habit.createdAt);
         const relapsedToday = habit.logs.some(l => l.date === todayStr);
         const isExpanded = expandedHabit === habit.id;
-        const creationDate = parseISO(habit.createdAt);
+        const creationDate = safeParseDate(habit.createdAt);
 
         const heatmapDays = getHeatmapData();
         const firstDayOfWeek = getDay(heatmapDays[0]); 
