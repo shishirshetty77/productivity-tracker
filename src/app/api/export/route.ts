@@ -44,10 +44,14 @@ export async function GET(request: NextRequest) {
 
     // JSON format (LLM-friendly structure) - includes ALL data
     const jsonData = {
-      habits: habits.map((h: { name: string; type: string; goalFrequency: number; logs: { date: string; value: number }[] }) => ({
+      habits: habits.map((h: { name: string; description: string | null; color: string; icon: string; type: string; goalFrequency: number; createdAt: Date; logs: { date: string; value: number }[] }) => ({
         name: h.name,
+        description: h.description,
+        color: h.color,
+        icon: h.icon,
         type: h.type,
         goal_frequency: h.goalFrequency,
+        created_at: h.createdAt,
         logs: h.logs.map((l: { date: string; value: number }) => ({ date: l.date, value: l.value }))
       })),
       days: days.map((day: { date: string; startTime: string; endTime: string; completed: boolean; sleepTime: string | null; wakeTime: string | null; sleepDuration: number | null; sleepQuality: string | null; timeBlocks: { startTime: string; endTime: string; done: boolean; skipped: boolean; activity: string; rating: string | null }[] }) => ({
