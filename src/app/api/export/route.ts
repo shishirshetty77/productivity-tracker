@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
         goal_frequency: h.goalFrequency,
         logs: h.logs.map((l: { date: string; value: number }) => ({ date: l.date, value: l.value }))
       })),
-      days: days.map((day: { date: string; startTime: string; endTime: string; completed: boolean; sleepTime?: string; wakeTime?: string; sleepDuration?: number; sleepQuality?: string; timeBlocks: { startTime: string; endTime: string; done: boolean; skipped: boolean; activity: string; rating?: string }[] }) => ({
+      days: days.map((day: { date: string; startTime: string; endTime: string; completed: boolean; sleepTime: string | null; wakeTime: string | null; sleepDuration: number | null; sleepQuality: string | null; timeBlocks: { startTime: string; endTime: string; done: boolean; skipped: boolean; activity: string; rating: string | null }[] }) => ({
       date: day.date,
       day_window: `${day.startTime}-${day.endTime}`,
       completed: day.completed,
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
         duration: day.sleepDuration || null,
         quality: day.sleepQuality || null,
       },
-      intervals: day.timeBlocks.map((block: { startTime: string; endTime: string; done: boolean; skipped: boolean; activity: string; rating: string }) => ({
+      intervals: day.timeBlocks.map((block: { startTime: string; endTime: string; done: boolean; skipped: boolean; activity: string; rating: string | null }) => ({
         start: block.startTime,
         end: block.endTime,
         done: block.done,
