@@ -13,6 +13,7 @@ export default function MobileStatsPage() {
   const [days, setDays] = useState<Day[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [activeTab, setActiveTab] = useState<'abstinence' | 'sleep'>('abstinence');
 
   useEffect(() => {
     fetchData();
