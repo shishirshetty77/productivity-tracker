@@ -14,6 +14,7 @@ model User {
   role      String   @default("USER") // "ADMIN" or "USER"
   createdAt DateTime @default(now())
   days      Day[]
+  habits    Habit[]
 }
 
 model Day {
@@ -52,6 +53,36 @@ model TimeBlock {
   rating    BlockRating?
 
   @@index([dayId])
+}
+
+model Habit {
+  id            String     @id @default(cuid())
+  name          String
+  description   String?
+  color         String     @default("#3b82f6") // hex color
+  icon          String     @default("📝")      // emoji
+  goalFrequency Int        @default(7)         // Days per week goal
+  createdAt     DateTime   @default(now())
+  
+  userId        String
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  logs          HabitLog[]
+
+  @@index([userId])
+}
+
+model HabitLog {
+  id        String   @id @default(cuid())
+  date      String   // YYYY-MM-DD
+  value     Int      @default(1) // Can be used for quantity (pages, minutes) or just 1 for boolean
+  createdAt DateTime @default(now())
+  
+  habitId   String
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date]) // One log per habit per day
+  @@index([habitId])
 }
 
 enum BlockRating {
