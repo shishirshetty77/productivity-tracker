@@ -5,6 +5,8 @@ export interface Habit {
   color: string;
   icon: string;
   goalFrequency: number;
+  type: 'POSITIVE' | 'ABSTINENCE';
+  createdAt: string;
 }
 
 export interface HabitLog {

@@ -107,47 +107,72 @@ export default function MobileStatsPage() {
             </Link>
             <h1 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
                 <BarChart size={24} className="text-[var(--accent-blue)]" />
-                Abstinence & Stats
+                Statistics
             </h1>
        </header>
 
        <main className="max-w-2xl mx-auto space-y-8">
-            {/* Habits Section */}
-            <section>
-                <div className="flex items-center justify-between mb-4">
-                    <div>
-                        <h2 className="text-lg font-semibold text-[var(--text-primary)]">Abstinence Management</h2>
-                        <p className="text-xs text-[var(--text-secondary)]">Track bad habits you want to quit.</p>
+            {/* Tabs */}
+            <div className="flex p-1 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-primary)]">
+                <button
+                    onClick={() => setActiveTab('abstinence')}
+                    className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
+                        activeTab === 'abstinence' 
+                        ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm' 
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                >
+                    Abstinence
+                </button>
+                <button
+                    onClick={() => setActiveTab('sleep')}
+                    className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
+                        activeTab === 'sleep' 
+                        ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm' 
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                >
+                    Sleep Stats
+                </button>
+            </div>
+
+            {/* Content */}
+            {activeTab === 'abstinence' ? (
+                <section className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Abstinence Management</h2>
+                            <p className="text-xs text-[var(--text-secondary)]">Track bad habits you want to quit.</p>
+                        </div>
+                        
+                        <button 
+                            onClick={() => setShowForm(true)}
+                            className="p-2 bg-[var(--accent-blue)] hover:bg-[var(--accent-hover)] text-white rounded-lg transition-colors shadow-lg shadow-blue-500/20"
+                        >
+                            <Plus size={20} />
+                        </button>
                     </div>
                     
-                    <button 
-                        onClick={() => setShowForm(true)}
-                        className="p-2 bg-[var(--accent-blue)] hover:bg-[var(--accent-hover)] text-white rounded-lg transition-colors shadow-lg shadow-blue-500/20"
-                    >
-                        <Plus size={20} />
-                    </button>
-                </div>
-                
-                {loading ? (
-                    <div className="text-center py-10 text-[var(--text-secondary)]">Loading...</div>
-                ) : habits.length === 0 ? (
-                    <div className="text-center py-10 border border-dashed border-[var(--border-primary)] rounded-xl bg-[var(--bg-secondary)]">
-                        <p className="text-[var(--text-secondary)] mb-2">No active trackers</p>
-                        <button onClick={() => setShowForm(true)} className="text-[var(--accent-blue)] hover:underline">Start quitting a habit</button>
+                    {loading ? (
+                        <div className="text-center py-10 text-[var(--text-secondary)]">Loading...</div>
+                    ) : habits.length === 0 ? (
+                        <div className="text-center py-10 border border-dashed border-[var(--border-primary)] rounded-xl bg-[var(--bg-secondary)]">
+                            <p className="text-[var(--text-secondary)] mb-2">No active trackers</p>
+                            <button onClick={() => setShowForm(true)} className="text-[var(--accent-blue)] hover:underline">Start quitting a habit</button>
+                        </div>
+                    ) : (
+                        <HabitList habits={habits} onToggle={toggleHabit} onDelete={deleteHabit} />
+                    )}
+                </section>
+            ) : (
+                <section className="bg-[var(--bg-secondary)] p-6 rounded-xl border border-[var(--border-primary)] animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="flex items-center gap-2 mb-6">
+                        <Moon size={20} className="text-purple-400" />
+                        <h2 className="text-lg font-semibold text-[var(--text-primary)]">Sleep Trends</h2>
                     </div>
-                ) : (
-                    <HabitList habits={habits} onToggle={toggleHabit} onDelete={deleteHabit} />
-                )}
-            </section>
-            
-            {/* Charts Section */}
-            <section className="bg-[var(--bg-secondary)] p-6 rounded-xl border border-[var(--border-primary)]">
-                <div className="flex items-center gap-2 mb-6">
-                    <Moon size={20} className="text-purple-400" />
-                    <h2 className="text-lg font-semibold text-[var(--text-primary)]">Sleep Trends</h2>
-                </div>
-                <SleepChart days={days} />
-            </section>
+                    <SleepChart days={days} />
+                </section>
+            )}
        </main>
 
        {showForm && (

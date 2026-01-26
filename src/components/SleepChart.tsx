@@ -37,88 +37,124 @@ export default function SleepChart({ days }: SleepChartProps) {
     // Generate Points string
     const points = chartData.map((d, i) => `${getX(i)},${getY(d.duration)}`).join(' ');
 
+    // Calculate Averages
+    const validSleepDays = chartData.filter(d => d.duration > 0);
+    const avgDuration = validSleepDays.length > 0 
+        ? (validSleepDays.reduce((acc, curr) => acc + curr.duration, 0) / validSleepDays.length).toFixed(1)
+        : '0';
+    
+    // Count quality
+    const qualityCounts: Record<string, number> = {};
+    validSleepDays.forEach(d => {
+        if(d.quality) qualityCounts[d.quality] = (qualityCounts[d.quality] || 0) + 1;
+    });
+    // Find mode quality
+    const topQuality = Object.entries(qualityCounts).sort((a,b) => b[1] - a[1])[0]?.[0] || '-';
+
     return (
-        <div className="w-full overflow-x-auto">
-            <div className="min-w-[600px]">
-                <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
-                     {/* Background Grid Lines */}
-                     {[0, 2, 4, 6, 8, 10].map(h => (
-                        <line 
-                            key={h} 
-                            x1={padding} 
-                            y1={getY(h)} 
-                            x2={width - padding} 
-                            y2={getY(h)} 
-                            stroke="var(--border-primary)" 
-                            strokeWidth="1" 
-                            strokeDasharray="4 4"
-                        />
-                     ))}
+        <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+                <div className="bg-[var(--bg-tertiary)] p-4 rounded-xl border border-[var(--border-primary)]">
+                    <p className="text-xs text-[var(--text-secondary)] uppercase tracking-wider mb-1">Avg Duration</p>
+                    <p className="text-2xl font-bold text-[var(--text-primary)]">{avgDuration}<span className="text-sm font-normal text-[var(--text-secondary)]">h</span></p>
+                </div>
+                <div className="bg-[var(--bg-tertiary)] p-4 rounded-xl border border-[var(--border-primary)]">
+                    <p className="text-xs text-[var(--text-secondary)] uppercase tracking-wider mb-1">Typ. Quality</p>
+                    <p className="text-2xl font-bold text-[var(--text-primary)]">{topQuality}</p>
+                </div>
+            </div>
 
-                     {/* The Line */}
-                     <polyline 
-                        fill="none" 
-                        stroke="var(--accent-blue)" 
-                        strokeWidth="2" 
-                        points={points} 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round"
-                    />
-
-                    {/* Data Points */}
-                    {chartData.map((d, i) => (
-                        <g key={d.date} className="group">
-                            <circle 
-                                cx={getX(i)} 
-                                cy={getY(d.duration)} 
-                                r="4" 
-                                fill="var(--bg-secondary)" 
-                                stroke="var(--accent-blue)"
-                                strokeWidth="2"
-                                className="transition-all hover:r-6 hover:fill-[var(--accent-blue)]"
+            <div className="w-full overflow-x-auto">
+                <div className="min-w-[500px]">
+                    <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
+                         {/* Background Grid Lines */}
+                         {[0, 2, 4, 6, 8, 10, 12].map(h => (
+                            <line 
+                                key={h} 
+                                x1={padding} 
+                                y1={getY(h)} 
+                                x2={width - padding} 
+                                y2={getY(h)} 
+                                stroke="var(--border-primary)" 
+                                strokeWidth="1" 
+                                strokeDasharray="4 4"
                             />
-                            {/* Tooltip on hover */}
-                            <g className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                <rect 
-                                    x={getX(i) - 40} 
-                                    y={getY(d.duration) - 40} 
-                                    width="80" 
-                                    height="30" 
-                                    rx="4" 
-                                    fill="var(--bg-tertiary)" 
-                                    stroke="var(--border-primary)"
+                         ))}
+    
+                         {/* The Line */}
+                         <polyline 
+                            fill="none" 
+                            stroke="var(--accent-blue)" 
+                            strokeWidth="2" 
+                            points={points} 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round"
+                        />
+    
+                        {/* Data Points */}
+                        {chartData.map((d, i) => (
+                            <g key={d.date} className="group">
+                                <circle 
+                                    cx={getX(i)} 
+                                    cy={getY(d.duration)} 
+                                    r="4" 
+                                    fill="var(--bg-secondary)" 
+                                    stroke="var(--accent-blue)"
+                                    strokeWidth="2"
+                                    className="transition-all hover:r-6 hover:fill-[var(--accent-blue)]"
                                 />
-                                <text 
-                                    x={getX(i)} 
-                                    y={getY(d.duration) - 20} 
-                                    textAnchor="middle" 
-                                    fill="var(--text-primary)" 
-                                    fontSize="10"
-                                    fontWeight="bold"
-                                >
-                                    {d.duration}h ({d.quality || '?'})
-                                </text>
+                                {/* Tooltip on hover */}
+                                <g className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                    <rect 
+                                        x={getX(i) - 40} 
+                                        y={getY(d.duration) - 45} 
+                                        width="80" 
+                                        height="35" 
+                                        rx="4" 
+                                        fill="var(--bg-tertiary)" 
+                                        stroke="var(--border-primary)"
+                                    />
+                                    <text 
+                                        x={getX(i)} 
+                                        y={getY(d.duration) - 22} 
+                                        textAnchor="middle" 
+                                        fill="var(--text-primary)" 
+                                        fontSize="11"
+                                        fontWeight="bold"
+                                    >
+                                        {d.duration}h
+                                    </text>
+                                    <text 
+                                        x={getX(i)} 
+                                        y={getY(d.duration) - 13} 
+                                        textAnchor="middle" 
+                                        fill="var(--text-secondary)" 
+                                        fontSize="9"
+                                    >
+                                        {d.quality || 'No Data'}
+                                    </text>
+                                </g>
                             </g>
-                        </g>
-                    ))}
-
-                    {/* X Axis Labels (Sparse) */}
-                    {chartData.map((d, i) => {
-                        if (i % 5 !== 0 && i !== chartData.length - 1) return null;
-                        return (
-                            <text 
-                                key={d.date} 
-                                x={getX(i)} 
-                                y={height} 
-                                textAnchor="middle" 
-                                fill="var(--text-secondary)" 
-                                fontSize="10"
-                            >
-                                {d.date.slice(5)}
-                            </text>
-                        );
-                    })}
-                </svg>
+                        ))}
+    
+                        {/* X Axis Labels (Sparse) */}
+                        {chartData.map((d, i) => {
+                            if (i % 5 !== 0 && i !== chartData.length - 1) return null;
+                            return (
+                                <text 
+                                    key={d.date} 
+                                    x={getX(i)} 
+                                    y={height + 15} 
+                                    textAnchor="middle" 
+                                    fill="var(--text-secondary)" 
+                                    fontSize="10"
+                                >
+                                    {d.date.slice(5)}
+                                </text>
+                            );
+                        })}
+                    </svg>
+                </div>
             </div>
         </div>
     );

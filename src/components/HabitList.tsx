@@ -16,22 +16,23 @@ export default function HabitList({ habits, onToggle, onDelete }: HabitListProps
   const [expandedHabit, setExpandedHabit] = useState<string | null>(null);
   const today = new Date().toISOString().split('T')[0];
 
-  // Abstinence Logic:
-  // Streak = Number of continuous days going backwards from today found NOT in logs.
-  // If Log exists today: Streak = 0.
-  // If Log exists yesterday: Streak = 0 (unless we ignore today if not logged yet? No, usually relapse resets instantly).
-  
-  const getAbstinenceStats = (logs: HabitLog[]) => {
+  const getAbstinenceStats = (logs: HabitLog[], createdAt: string) => {
     // Sort logs descending (newest first)
     const sortedLogs = [...logs].sort((a, b) => b.date.localeCompare(a.date));
     
     // 1. Current Streak
     let streak = 0;
     let checkDate = new Date();
-    // Safety break
-    let limit = 365 * 2; 
-
-    while (limit > 0) {
+    // Start of habit (ignore time)
+    const startDate = parseISO(createdAt);
+    startDate.setHours(0, 0, 0, 0);
+    
+    // Calculate streak going backwards
+    while (true) {
+        const checkTime = checkDate.getTime();
+        // Stop if we go before creation date
+        if (checkTime < startDate.getTime()) break;
+        
         const dateStr = checkDate.toISOString().split('T')[0];
         const hasRelapse = sortedLogs.some(l => l.date === dateStr);
         
@@ -41,13 +42,7 @@ export default function HabitList({ habits, onToggle, onDelete }: HabitListProps
             streak++;
         }
         checkDate.setDate(checkDate.getDate() - 1);
-        limit--;
     }
-
-    // 2. Best Streak (Simple algo: Max gap between logs)
-    // Actually best streak calculation needs to look at all gaps.
-    // For MVP we can just show current streak or compute properly.
-    // Let's stick to Current Streak for the card, maybe detailed stats later.
     
     return { streak }; 
   };
@@ -65,7 +60,9 @@ export default function HabitList({ habits, onToggle, onDelete }: HabitListProps
   return (
     <div className="space-y-4">
       {habits.map(habit => {
-        const stats = getAbstinenceStats(habit.logs);
+        const stats = getAbstinenceStats(habit.logs, habit.createdAt); // createdAt needed from backend
+        // Note: habits prop needs to include createdAt. In Types, I need to check if Habit interface has it.
+        // It does in schema, but let's ensure API returns it.
         const relapsedToday = habit.logs.some(l => l.date === today);
         const isExpanded = expandedHabit === habit.id;
 
@@ -114,7 +111,7 @@ export default function HabitList({ habits, onToggle, onDelete }: HabitListProps
                         </button>
                     ) : (
                         <button
-                            onClick={() => onToggle(habit.id, today)} // Expecting toggle to remove it
+                            onClick={() => onToggle(habit.id, today)} 
                             className="px-4 py-2 text-[var(--text-secondary)] text-xs hover:text-[var(--text-primary)]"
                         >
                             Undo
@@ -143,16 +140,23 @@ export default function HabitList({ habits, onToggle, onDelete }: HabitListProps
                             const dateStr = format(date, 'yyyy-MM-dd');
                             const isRelapse = habit.logs.some(l => l.date === dateStr);
                             const isFuture = date > new Date();
+                            const startDate = parseISO(habit.createdAt);
+                            startDate.setHours(0,0,0,0);
                             
+                            // Check if before creation
+                            const isBeforeCreation = date < startDate;
+
                             if (isFuture) return null;
 
                             return (
                                 <div 
                                     key={dateStr}
-                                    title={`${dateStr}: ${isRelapse ? 'Relapsed' : 'Clean'}`}
+                                    title={`${dateStr}: ${isBeforeCreation ? 'Not Tracked' : isRelapse ? 'Relapsed' : 'Clean'}`}
                                     className={clsx(
                                         "w-2.5 h-2.5 rounded-[2px] transition-colors",
-                                        isRelapse ? "bg-red-500/50" : "bg-green-500/20 hover:bg-green-500/40"
+                                        isBeforeCreation ? "bg-black/20" : // Black (Dark Gray) for untracked
+                                        isRelapse ? "bg-red-500/50" : // Red for relapse
+                                        "bg-green-500/40 hover:bg-green-500/60" // Green for clean
                                     )}
                                 />
                             );
@@ -161,7 +165,11 @@ export default function HabitList({ habits, onToggle, onDelete }: HabitListProps
                     
                     <div className="flex items-center gap-4 mt-4 text-xs text-[var(--text-secondary)]">
                         <div className="flex items-center gap-1.5">
-                            <div className="w-2.5 h-2.5 rounded-[2px] bg-green-500/20" />
+                           <div className="w-2.5 h-2.5 rounded-[2px] bg-black/20" />
+                           <span>Not Tracked</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-2.5 h-2.5 rounded-[2px] bg-green-500/40" />
                             <span>Clean</span>
                         </div>
                         <div className="flex items-center gap-1.5">
