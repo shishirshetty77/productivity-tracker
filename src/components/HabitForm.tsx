@@ -19,18 +19,17 @@ const COLORS = [
   '#ec4899', // pink
 ];
 
-const ICONS = ['📝', '🏃', '💧', '🧘', '📚', '💪', '🧠', '🥗', '💤', '🎸', '💻', '🎨'];
+const ICONS = ['📝', '🏃', '💧', '🧘', '📚', '💪', '🧠', '🥗', '💤', '🎸', '💻', '🎨', '🚬', '🍬', '🍺', '🎮', '📱'];
 
 export default function HabitForm({ onClose, onSave }: HabitFormProps) {
   const [name, setName] = useState('');
   const [color, setColor] = useState(COLORS[5]);
-  const [icon, setIcon] = useState(ICONS[0]);
-  const [goal, setGoal] = useState(7);
-
+  const [icon, setIcon] = useState(ICONS[13]); // Candy default for abstinence example?
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    onSave({ name, color, icon, goalFrequency: goal });
+    onSave({ name, color, icon, goalFrequency: 7 }); // Default 7 for schema compat
     onClose();
   };
 
@@ -91,26 +90,15 @@ export default function HabitForm({ onClose, onSave }: HabitFormProps) {
             </div>
 
             <div>
-                 <label className="block text-sm text-[var(--text-secondary)] mb-2">Weekly Goal: {goal} days</label>
-                 <input 
-                    type="range" 
-                    min="1" 
-                    max="7" 
-                    value={goal}
-                    onChange={(e) => setGoal(Number(e.target.value))}
-                    className="w-full accent-[var(--accent-blue)]"
-                 />
-                 <div className="flex justify-between text-xs text-[var(--text-secondary)] mt-1">
-                    <span>1 day</span>
-                    <span>Every day</span>
-                 </div>
+                 <label className="block text-sm text-[var(--text-secondary)] mb-2">Goal: Abstinence</label>
+                 <p className="text-xs text-[var(--text-secondary)]">We will track how many days you stay clean from this habit.</p>
             </div>
 
             <button
                 type="submit"
                 className="w-full py-2.5 bg-[var(--accent-blue)] hover:bg-[var(--accent-hover)] text-white rounded-lg font-medium transition-colors"
             >
-                Create Habit
+                Start Quitting
             </button>
         </form>
       </div>

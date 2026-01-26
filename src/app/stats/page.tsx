@@ -3,28 +3,36 @@
 import { useState, useEffect } from 'react';
 import HabitList from '@/components/HabitList';
 import HabitForm from '@/components/HabitForm';
-import { Habit, HabitLog } from '@/types';
+import SleepChart from '@/components/SleepChart';
+import { Habit, HabitLog, Day } from '@/types';
 import Link from 'next/link';
-import { ArrowLeft, BarChart, Plus } from 'lucide-react';
+import { ArrowLeft, BarChart, Plus, Moon } from 'lucide-react';
 
 export default function MobileStatsPage() {
   const [habits, setHabits] = useState<(Habit & { logs: HabitLog[] })[]>([]);
+  const [days, setDays] = useState<Day[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
-    fetchHabits();
+    fetchData();
   }, []);
 
-  const fetchHabits = async () => {
+  const fetchData = async () => {
     try {
-      const res = await fetch('/api/habits');
-      if (res.ok) {
-        const data = await res.json();
-        setHabits(data);
+      const [habitsRes, daysRes] = await Promise.all([
+         fetch('/api/habits'),
+         fetch('/api/days')
+      ]);
+      
+      if (habitsRes.ok) {
+        setHabits(await habitsRes.json());
+      }
+      if (daysRes.ok) {
+        setDays(await daysRes.json());
       }
     } catch (error) {
-      console.error('Failed to fetch habits', error);
+      console.error('Failed to fetch data', error);
     } finally {
       setLoading(false);
     }
@@ -32,12 +40,13 @@ export default function MobileStatsPage() {
 
   const createHabit = async (habitData: any) => {
     try {
+       // Force type to Abstinence implicitly
         const res = await fetch('/api/habits', {
             method: 'POST',
-            body: JSON.stringify(habitData)
+            body: JSON.stringify({ ...habitData, type: 'ABSTINENCE' })
         });
         if (res.ok) {
-            fetchHabits();
+            fetchData();
         }
     } catch (error) {
         console.error('Failed to create', error);
@@ -45,11 +54,16 @@ export default function MobileStatsPage() {
   };
 
   const toggleHabit = async (habitId: string, date: string) => {
-     // Optimistic update
+     // Optimistic
+     const habit = habits.find(h => h.id === habitId);
+     if (!habit) return;
+
+     const exists = habit.logs.find(l => l.date === date);
+     
+     // Update UI immediately
      setHabits(prev => prev.map(h => {
         if (h.id === habitId) {
-            const exists = h.logs.find(l => l.date === date);
-            if (exists) {
+             if (exists) {
                 return { ...h, logs: h.logs.filter(l => l.date !== date) };
             } else {
                 return { ...h, logs: [...h.logs, { id: 'temp', date, value: 1, habitId } as HabitLog] };
@@ -58,14 +72,7 @@ export default function MobileStatsPage() {
         return h;
      }));
 
-     // Call API
      try {
-         // Determine if adding or removing (actually logic is simpler to just post/delete but log route handles toggle-ish logic? No, logs route is upsert)
-         // Wait, my log route is UPSERT. To toggle OFF I need delete.
-         
-         const habit = habits.find(h => h.id === habitId);
-         const exists = habit?.logs.find(l => l.date === date);
-
          if (exists) {
             await fetch(`/api/habits/log?habitId=${habitId}&date=${date}`, { method: 'DELETE' });
          } else {
@@ -74,15 +81,15 @@ export default function MobileStatsPage() {
                 body: JSON.stringify({ habitId, date, value: 1 })
             });
          }
-         fetchHabits(); // Re-fetch to sync
+         // fetchData(); // Optional sync
      } catch (error) {
          console.error('Failed to toggle', error);
-         fetchHabits(); // Revert
+         fetchData(); // Revert on error
      }
   };
 
   const deleteHabit = async (habitId: string) => {
-      if(!confirm('Delete this habit?')) return;
+      if(!confirm('Delete this tracker?')) return;
       try {
           await fetch(`/api/habits/${habitId}`, { method: 'DELETE' });
           setHabits(prev => prev.filter(h => h.id !== habitId));
@@ -100,7 +107,7 @@ export default function MobileStatsPage() {
             </Link>
             <h1 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
                 <BarChart size={24} className="text-[var(--accent-blue)]" />
-                Statistics
+                Abstinence & Stats
             </h1>
        </header>
 
@@ -108,10 +115,14 @@ export default function MobileStatsPage() {
             {/* Habits Section */}
             <section>
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-[var(--text-primary)]">My Habits</h2>
+                    <div>
+                        <h2 className="text-lg font-semibold text-[var(--text-primary)]">Abstinence Management</h2>
+                        <p className="text-xs text-[var(--text-secondary)]">Track bad habits you want to quit.</p>
+                    </div>
+                    
                     <button 
                         onClick={() => setShowForm(true)}
-                        className="p-2 bg-[var(--accent-blue)] hover:bg-[var(--accent-hover)] text-white rounded-lg transition-colors"
+                        className="p-2 bg-[var(--accent-blue)] hover:bg-[var(--accent-hover)] text-white rounded-lg transition-colors shadow-lg shadow-blue-500/20"
                     >
                         <Plus size={20} />
                     </button>
@@ -121,20 +132,21 @@ export default function MobileStatsPage() {
                     <div className="text-center py-10 text-[var(--text-secondary)]">Loading...</div>
                 ) : habits.length === 0 ? (
                     <div className="text-center py-10 border border-dashed border-[var(--border-primary)] rounded-xl bg-[var(--bg-secondary)]">
-                        <p className="text-[var(--text-secondary)] mb-2">No habits tracked yet</p>
-                        <button onClick={() => setShowForm(true)} className="text-[var(--accent-blue)] hover:underline">Create one</button>
+                        <p className="text-[var(--text-secondary)] mb-2">No active trackers</p>
+                        <button onClick={() => setShowForm(true)} className="text-[var(--accent-blue)] hover:underline">Start quitting a habit</button>
                     </div>
                 ) : (
                     <HabitList habits={habits} onToggle={toggleHabit} onDelete={deleteHabit} />
                 )}
             </section>
             
-            {/* Charts Section (Placeholder for now) */}
+            {/* Charts Section */}
             <section className="bg-[var(--bg-secondary)] p-6 rounded-xl border border-[var(--border-primary)]">
-                <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Sleep & Performance</h2>
-                <div className="h-40 flex items-center justify-center text-[var(--text-secondary)] text-sm italic">
-                    Sleep charts coming soon...
+                <div className="flex items-center gap-2 mb-6">
+                    <Moon size={20} className="text-purple-400" />
+                    <h2 className="text-lg font-semibold text-[var(--text-primary)]">Sleep Trends</h2>
                 </div>
+                <SleepChart days={days} />
             </section>
        </main>
 

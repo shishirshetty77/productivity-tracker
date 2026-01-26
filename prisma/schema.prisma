@@ -62,6 +62,7 @@ model Habit {
   color         String     @default("#3b82f6") // hex color
   icon          String     @default("📝")      // emoji
   goalFrequency Int        @default(7)         // Days per week goal
+  type          HabitType  @default(ABSTINENCE)
   createdAt     DateTime   @default(now())
   
   userId        String
@@ -89,4 +90,9 @@ enum BlockRating {
   PRODUCTIVE
   MODERATE
   DISTRACTED
+}
+
+enum HabitType {
+  POSITIVE
+  ABSTINENCE
 }
