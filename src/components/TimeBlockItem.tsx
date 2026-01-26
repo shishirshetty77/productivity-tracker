@@ -146,7 +146,7 @@ export default function TimeBlockItem({
             data-input-index={index}
             rows={1}
             placeholder={rating === 'DISTRACTED' ? "What distracted you?" : "What did you do?"}
-            className={`w-full bg-transparent resize-none focus:outline-none text-sm transition-colors decoration-gray-600 ${
+            className={`w-full bg-transparent resize-none focus:outline-none text-base sm:text-sm transition-colors decoration-gray-600 ${
                 rating === 'PRODUCTIVE' || done ? 'text-[var(--text-secondary)]' : 
                 rating === 'DISTRACTED' ? 'text-red-300/80' : 
                 skipped ? 'text-gray-600 italic' : 
