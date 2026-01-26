@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Day, TimeBlock, SleepQuality, BlockRating } from "@/types";
+import { Day, SleepQuality, BlockRating } from "@/types";
 import { getTodayDate } from "@/lib/utils";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import DayCard from "@/components/DayCard";

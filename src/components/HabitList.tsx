@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { Habit, HabitLog } from '@/types';
-import { Flame, Trash2, XCircle, Trophy } from 'lucide-react';
+import { Trash2, XCircle, Trophy } from 'lucide-react';
 import { clsx } from 'clsx';
-import { format, subDays, isSameDay, parseISO } from 'date-fns';
+import { format, subDays, parseISO } from 'date-fns';
 
 interface HabitListProps {
   habits: (Habit & { logs: HabitLog[] })[];
@@ -22,7 +22,7 @@ export default function HabitList({ habits, onToggle, onDelete }: HabitListProps
     
     // 1. Current Streak
     let streak = 0;
-    let checkDate = new Date();
+    const checkDate = new Date();
     // Start of habit (ignore time)
     const startDate = parseISO(createdAt);
     startDate.setHours(0, 0, 0, 0);
@@ -97,6 +97,9 @@ export default function HabitList({ habits, onToggle, onDelete }: HabitListProps
                                 )}
                             </span>
                         </div>
+                        <p className="text-[10px] text-[var(--text-secondary)] mt-1">
+                            Started on {format(parseISO(habit.createdAt), 'MMM d, yyyy')}
+                        </p>
                     </div>
                 </div>
 

@@ -120,7 +120,28 @@ export default function TimeBlockItem({
         <textarea
             ref={textareaRef}
             value={activity}
-            onChange={(e) => onUpdate(id, { activity: e.target.value })}
+            onChange={(e) => {
+                const newActivity = e.target.value;
+                // Auto-mark as 'done'/Productive if typing something and not already rated/skipped
+                // Or just auto-save text. User explicitly asked for: "if i ddi not add tag and just write the details it does not take so fix that issue"
+                // which implies it should count as done/filled.
+                
+                const updates: { activity?: string; done?: boolean; skipped?: boolean } = { activity: newActivity };
+                
+                // If activity has content and no rating/status is set, mark as done
+                // Actually user said "it adds to the datys like 2/27 but if i ddi not add tag... it does not take"
+                // So we need to ensure 'done' is true if activity is present.
+                if (newActivity.trim().length > 0 && !rating && !done && !skipped) {
+                    updates.done = true;
+                } 
+                // If cleared activity and no rating, unmark done? Maybe safer to just add done.
+                // But if they delete the text, maybe revert?
+                else if (newActivity.trim().length === 0 && !rating) {
+                    updates.done = false;
+                }
+
+                onUpdate(id, updates);
+            }}
             onKeyDown={handleKeyDown}
             data-input-index={index}
             rows={1}

@@ -39,7 +39,7 @@ export default function MobileStatsPage() {
     }
   };
 
-  const createHabit = async (habitData: any) => {
+  const createHabit = async (habitData: Pick<Habit, 'name' | 'color' | 'icon' | 'goalFrequency'>) => {
     try {
        // Force type to Abstinence implicitly
         const res = await fetch('/api/habits', {
