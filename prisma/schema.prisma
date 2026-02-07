@@ -33,6 +33,9 @@ model Day {
   sleepDuration Float?    // Hours of sleep
   sleepQuality  String?   // GOOD, DEEP, LIGHT, RESTLESS, POOR
   
+  // Weight tracking
+  weight        Float?    // Body weight in kg
+  
   userId      String?     // Optional for migration compatibility, will be required later
   user        User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
 

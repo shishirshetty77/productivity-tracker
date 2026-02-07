@@ -13,12 +13,11 @@ export default function SleepChart({ days }: SleepChartProps) {
     const chartData = useMemo(() => {
         return [...days]
             .sort((a, b) => a.date.localeCompare(b.date))
-            .slice(-30) // Last 30 days
+            .filter(day => day.sleepDuration != null && day.sleepDuration > 0)
+            .slice(-30) // Last 30 entries with sleep data
             .map(day => ({
                 date: day.date,
-                // Parse duration? Or use the pre-calculated one if backend sends it. 
-                // Currently backend Day type in types/index.ts has sleepDuration? (number). Yes.
-                duration: day.sleepDuration || 0, 
+                duration: day.sleepDuration as number,
                 quality: day.sleepQuality
             }));
     }, [days]);

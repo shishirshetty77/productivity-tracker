@@ -20,7 +20,7 @@ export async function DELETE(
 
     await prisma.habit.delete({ where: { id } });
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to delete habit' }, { status: 500 });
   }
 }

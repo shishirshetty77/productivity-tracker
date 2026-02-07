@@ -4,16 +4,17 @@ import { useState, useEffect } from 'react';
 import HabitList from '@/components/HabitList';
 import HabitForm from '@/components/HabitForm';
 import SleepChart from '@/components/SleepChart';
+import WeightChart from '@/components/WeightChart';
 import { Habit, HabitLog, Day } from '@/types';
 import Link from 'next/link';
-import { ArrowLeft, BarChart, Plus, Moon } from 'lucide-react';
+import { ArrowLeft, BarChart, Plus, Moon, Scale } from 'lucide-react';
 
 export default function MobileStatsPage() {
   const [habits, setHabits] = useState<(Habit & { logs: HabitLog[] })[]>([]);
   const [days, setDays] = useState<Day[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [activeTab, setActiveTab] = useState<'abstinence' | 'sleep'>('abstinence');
+  const [activeTab, setActiveTab] = useState<'abstinence' | 'sleep' | 'weight'>('abstinence');
 
   useEffect(() => {
     fetchData();
@@ -44,6 +45,7 @@ export default function MobileStatsPage() {
        // Force type to Abstinence implicitly
         const res = await fetch('/api/habits', {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ...habitData, type: 'ABSTINENCE' })
         });
         if (res.ok) {
@@ -79,6 +81,7 @@ export default function MobileStatsPage() {
          } else {
             await fetch('/api/habits/log', {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ habitId, date, value: 1 })
             });
          }
@@ -133,7 +136,17 @@ export default function MobileStatsPage() {
                         : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                     }`}
                 >
-                    Sleep Stats
+                    Sleep
+                </button>
+                <button
+                    onClick={() => setActiveTab('weight')}
+                    className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
+                        activeTab === 'weight' 
+                        ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm' 
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                >
+                    Weight
                 </button>
             </div>
 
@@ -165,13 +178,21 @@ export default function MobileStatsPage() {
                         <HabitList habits={habits} onToggle={toggleHabit} onDelete={deleteHabit} />
                     )}
                 </section>
-            ) : (
+            ) : activeTab === 'sleep' ? (
                 <section className="bg-[var(--bg-secondary)] p-6 rounded-xl border border-[var(--border-primary)] animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <div className="flex items-center gap-2 mb-6">
                         <Moon size={20} className="text-purple-400" />
                         <h2 className="text-lg font-semibold text-[var(--text-primary)]">Sleep Trends</h2>
                     </div>
                     <SleepChart days={days} />
+                </section>
+            ) : (
+                <section className="bg-[var(--bg-secondary)] p-6 rounded-xl border border-[var(--border-primary)] animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="flex items-center gap-2 mb-6">
+                        <Scale size={20} className="text-amber-400" />
+                        <h2 className="text-lg font-semibold text-[var(--text-primary)]">Weight Trends</h2>
+                    </div>
+                    <WeightChart days={days} />
                 </section>
             )}
        </main>

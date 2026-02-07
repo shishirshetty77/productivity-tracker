@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     });
     
     return NextResponse.json(log);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to log habit' }, { status: 500 });
   }
 }
@@ -64,7 +64,7 @@ export async function DELETE(req: NextRequest) {
       });
       
       return NextResponse.json({ success: true, count });
-    } catch (error) {
+    } catch {
       return NextResponse.json({ error: 'Failed to remove log' }, { status: 500 });
     }
   }

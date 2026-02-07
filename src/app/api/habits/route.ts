@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+// NextRequest used only in POST
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/session';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const session = await getSession();
   if (!session?.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: 'desc' }
     });
     return NextResponse.json(habits);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to fetch habits' }, { status: 500 });
   }
 }
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
     });
     
     return NextResponse.json(habit);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to create habit' }, { status: 500 });
   }
 }
