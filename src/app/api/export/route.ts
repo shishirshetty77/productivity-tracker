@@ -42,8 +42,52 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // JSON format (LLM-friendly structure) - includes ALL data
+    // Compute aggregate metrics for LLM-friendly summary
+    const totalDays = days.length;
+    const completedDays = days.filter((d: { completed: boolean }) => d.completed).length;
+
+    const allBlocks = days.flatMap((d: { timeBlocks: { done: boolean; skipped: boolean; rating: string | null }[] }) => d.timeBlocks);
+    const totalBlocks = allBlocks.length;
+    const doneBlocks = allBlocks.filter((b: { done: boolean }) => b.done).length;
+    const skippedBlocks = allBlocks.filter((b: { skipped: boolean }) => b.skipped).length;
+    const productiveBlocks = allBlocks.filter((b: { rating: string | null }) => b.rating === 'PRODUCTIVE').length;
+    const distractedBlocks = allBlocks.filter((b: { rating: string | null }) => b.rating === 'DISTRACTED').length;
+
+    const sleepDays = days.filter((d: { sleepDuration: number | null }) => d.sleepDuration != null && d.sleepDuration > 0);
+    const avgSleep = sleepDays.length > 0
+      ? Math.round((sleepDays.reduce((sum: number, d: { sleepDuration: number | null }) => sum + (d.sleepDuration ?? 0), 0) / sleepDays.length) * 10) / 10
+      : null;
+
+    const weightDays = days.filter((d: { weight: number | null }) => d.weight != null && d.weight > 0);
+    const weightValues = weightDays.map((d: { weight: number | null }) => d.weight as number);
+    const weightSummary = weightValues.length > 0 ? {
+      current: weightValues[weightValues.length - 1],
+      start: weightValues[0],
+      min: Math.min(...weightValues),
+      max: Math.max(...weightValues),
+      average: Math.round((weightValues.reduce((a: number, b: number) => a + b, 0) / weightValues.length) * 10) / 10,
+      total_change: Math.round((weightValues[weightValues.length - 1] - weightValues[0]) * 10) / 10,
+      entries: weightValues.length,
+      unit: 'kg',
+    } : null;
+
+    // JSON format (LLM-friendly structure) - includes ALL data + summary
     const jsonData = {
+      summary: {
+        exported_at: new Date().toISOString(),
+        total_days_tracked: totalDays,
+        days_completed: completedDays,
+        completion_rate: totalDays > 0 ? `${Math.round((completedDays / totalDays) * 100)}%` : '0%',
+        total_time_blocks: totalBlocks,
+        blocks_done: doneBlocks,
+        blocks_skipped: skippedBlocks,
+        productivity_rate: totalBlocks > 0 ? `${Math.round((doneBlocks / totalBlocks) * 100)}%` : '0%',
+        productive_blocks: productiveBlocks,
+        distracted_blocks: distractedBlocks,
+        avg_sleep_hours: avgSleep,
+        weight: weightSummary,
+        total_habits: habits.length,
+      },
       habits: habits.map((h: { name: string; description: string | null; color: string; icon: string; type: string; goalFrequency: number; createdAt: Date; logs: { date: string; value: number }[] }) => ({
         name: h.name,
         description: h.description,
@@ -58,15 +102,13 @@ export async function GET(request: NextRequest) {
       date: day.date,
       day_window: `${day.startTime}-${day.endTime}`,
       completed: day.completed,
-      // Sleep tracking data
       sleep: {
-        bedTime: day.sleepTime || null,
-        wakeTime: day.wakeTime || null,
-        duration: day.sleepDuration || null,
-        quality: day.sleepQuality || null,
+        bedTime: day.sleepTime ?? null,
+        wakeTime: day.wakeTime ?? null,
+        duration: day.sleepDuration ?? null,
+        quality: day.sleepQuality ?? null,
       },
-      // Weight tracking data
-      weight: day.weight || null,
+      weight_kg: day.weight ?? null,
       intervals: day.timeBlocks.map((block: { startTime: string; endTime: string; done: boolean; skipped: boolean; activity: string; rating: string | null }) => ({
         start: block.startTime,
         end: block.endTime,

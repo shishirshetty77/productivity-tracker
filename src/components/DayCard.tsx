@@ -152,14 +152,13 @@ export default function DayCard({
   // State for expanded accordion group - defaults to current period only
   const [expandedPeriod, setExpandedPeriod] = useState<Period | null>(() => getCurrentPeriod() as Period);
 
-  // Update expanded period when day becomes expaned (only if not already set)
-  useEffect(() => {
-      if (isExpanded && isToday) {
-          const current = getCurrentPeriod();
-          // eslint-disable-next-line react-hooks/exhaustive-deps
-          setExpandedPeriod(prev => (prev === current ? prev : (current as Period)));
-      }
-  }, [isExpanded, isToday, getCurrentPeriod]); // Intentionally not including expandedPeriod to avoid loops, just on open
+  // Wrap onToggleExpand to sync the current time period when the card is opened
+  const handleToggleExpand = useCallback(() => {
+    if (!isExpanded && isToday) {
+      setExpandedPeriod(getCurrentPeriod() as Period);
+    }
+    onToggleExpand();
+  }, [isExpanded, isToday, getCurrentPeriod, onToggleExpand]);
 
   
   // Find current block index
@@ -242,7 +241,7 @@ export default function DayCard({
 
               {/* Mobile Expand Icon */}
               <button
-                onClick={onToggleExpand}
+                onClick={handleToggleExpand}
                 className="p-1 sm:hidden hover:bg-[var(--bg-tertiary)] rounded-lg transition-colors ml-auto"
               >
                 <svg 
@@ -306,7 +305,7 @@ export default function DayCard({
           
           {/* Expand Icon */}
           <button
-            onClick={onToggleExpand}
+            onClick={handleToggleExpand}
             className="p-2 hover:bg-[var(--bg-tertiary)] rounded-lg transition-colors"
           >
             <svg 

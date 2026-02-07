@@ -45,6 +45,7 @@ export default function MobileStatsPage() {
        // Force type to Abstinence implicitly
         const res = await fetch('/api/habits', {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ...habitData, type: 'ABSTINENCE' })
         });
         if (res.ok) {
@@ -80,6 +81,7 @@ export default function MobileStatsPage() {
          } else {
             await fetch('/api/habits/log', {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ habitId, date, value: 1 })
             });
          }

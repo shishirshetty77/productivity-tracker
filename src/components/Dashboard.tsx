@@ -267,16 +267,22 @@ export default function Dashboard() {
   };
 
   const handleExport = async (format: "json" | "markdown") => {
-    const res = await fetch(`/api/export?format=${format}`);
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download =
-      format === "json" ? "productivity-log.json" : "productivity-log.md";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    try {
+      const res = await fetch(`/api/export?format=${format}`);
+      if (!res.ok) throw new Error('Export failed');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download =
+        format === "json" ? "productivity-log.json" : "productivity-log.md";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Export failed:', error);
+    }
   };
 
   // DnD Handler (Placeholder for now, logic will be in DayCard mostly)
