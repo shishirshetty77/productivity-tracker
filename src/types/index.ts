@@ -29,6 +29,7 @@ export type Day = {
     wakeTime?: string | null;
     sleepDuration?: number | null;
     sleepQuality?: SleepQuality | null;
+    weight?: number | null;
 };
 
 export type TimeBlock = {

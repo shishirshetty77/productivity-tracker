@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
         created_at: h.createdAt,
         logs: h.logs.map((l: { date: string; value: number }) => ({ date: l.date, value: l.value }))
       })),
-      days: days.map((day: { date: string; startTime: string; endTime: string; completed: boolean; sleepTime: string | null; wakeTime: string | null; sleepDuration: number | null; sleepQuality: string | null; timeBlocks: { startTime: string; endTime: string; done: boolean; skipped: boolean; activity: string; rating: string | null }[] }) => ({
+      days: days.map((day: { date: string; startTime: string; endTime: string; completed: boolean; sleepTime: string | null; wakeTime: string | null; sleepDuration: number | null; sleepQuality: string | null; weight: number | null; timeBlocks: { startTime: string; endTime: string; done: boolean; skipped: boolean; activity: string; rating: string | null }[] }) => ({
       date: day.date,
       day_window: `${day.startTime}-${day.endTime}`,
       completed: day.completed,
@@ -65,6 +65,8 @@ export async function GET(request: NextRequest) {
         duration: day.sleepDuration || null,
         quality: day.sleepQuality || null,
       },
+      // Weight tracking data
+      weight: day.weight || null,
       intervals: day.timeBlocks.map((block: { startTime: string; endTime: string; done: boolean; skipped: boolean; activity: string; rating: string | null }) => ({
         start: block.startTime,
         end: block.endTime,
@@ -97,6 +99,7 @@ interface DayWithBlocks {
   wakeTime: string | null;
   sleepDuration: number | null;
   sleepQuality: string | null;
+  weight: number | null;
   timeBlocks: {
     startTime: string;
     endTime: string;
@@ -129,6 +132,12 @@ function generateMarkdown(days: DayWithBlocks[]): string {
       if (day.wakeTime) markdown += `- Wake Time: ${day.wakeTime}\n`;
       if (day.sleepDuration) markdown += `- Duration: ${day.sleepDuration} hours\n`;
       if (day.sleepQuality) markdown += `- Quality: ${day.sleepQuality}\n`;
+    }
+
+    // Weight data
+    if (day.weight) {
+      markdown += `\n### ⚖️ Weight\n\n`;
+      markdown += `- Weight: ${day.weight} kg\n`;
     }
     
     markdown += `\n### Time Blocks\n\n`;

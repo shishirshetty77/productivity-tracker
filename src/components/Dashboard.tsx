@@ -157,12 +157,13 @@ export default function Dashboard() {
       sleepDuration?: number;
       sleepQuality?: SleepQuality;
     },
+    weight?: number,
   ) => {
     try {
       const res = await fetch("/api/days", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date, startTime, endTime, ...sleepData }),
+        body: JSON.stringify({ date, startTime, endTime, ...sleepData, weight }),
       });
       if (res.ok) {
         const day: Day = await res.json();
@@ -619,8 +620,13 @@ export default function Dashboard() {
         {showNewDayModal && (
           <NewDayModal
             onClose={() => setShowNewDayModal(false)}
-            onCreate={(date, startTime, endTime, sleepData) => {
-              createDay(date, startTime, endTime, sleepData);
+            onCreate={(date: string, startTime: string, endTime: string, sleepData?: {
+              sleepTime?: string;
+              wakeTime?: string;
+              sleepDuration?: number;
+              sleepQuality?: SleepQuality;
+            }, weight?: number) => {
+              createDay(date, startTime, endTime, sleepData, weight);
               setShowNewDayModal(false);
             }}
             existingDates={days.map((d) => d.date)}
@@ -753,6 +759,7 @@ function NewDayModal({
       sleepDuration?: number;
       sleepQuality?: SleepQuality;
     },
+    weight?: number,
   ) => void;
   existingDates: string[];
 }) {
@@ -765,6 +772,10 @@ function NewDayModal({
   const [wakeTime, setWakeTime] = useState("");
   const [sleepQuality, setSleepQuality] = useState<SleepQuality | "">("");
   const [showSleepSection, setShowSleepSection] = useState(false);
+
+  // Weight tracking state
+  const [weightValue, setWeightValue] = useState("");
+  const [showWeightSection, setShowWeightSection] = useState(false);
 
   const dateExists = existingDates.includes(selectedDate);
   const isValidTime = startTime < endTime;
@@ -782,7 +793,11 @@ function NewDayModal({
         }
       : undefined;
 
-    onCreate(selectedDate, startTime, endTime, sleepData);
+    const parsedWeight = showWeightSection && weightValue
+      ? parseFloat(weightValue)
+      : undefined;
+
+    onCreate(selectedDate, startTime, endTime, sleepData, parsedWeight);
   };
 
   return (
@@ -966,6 +981,51 @@ function NewDayModal({
                       </option>
                     ))}
                   </select>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Weight Tracking Section */}
+          <div className="border-t border-[var(--border-primary)] pt-4">
+            <button
+              type="button"
+              onClick={() => setShowWeightSection(!showWeightSection)}
+              className="flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              <span className="text-lg">⚖️</span>
+              <span>Track Weight</span>
+              <svg
+                className={`w-4 h-4 transition-transform ${showWeightSection ? "rotate-180" : ""}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+
+            {showWeightSection && (
+              <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div>
+                  <label className="block text-sm text-[var(--text-secondary)] mb-2">
+                    ⚖️ Weight (kg)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="20"
+                    max="300"
+                    value={weightValue}
+                    onChange={(e) => setWeightValue(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-[var(--bg-tertiary)] border border-[var(--border-primary)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-blue)]"
+                    placeholder="e.g. 72.5"
+                  />
                 </div>
               </div>
             )}
