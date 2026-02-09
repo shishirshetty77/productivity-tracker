@@ -5,16 +5,17 @@ import HabitList from '@/components/HabitList';
 import HabitForm from '@/components/HabitForm';
 import SleepChart from '@/components/SleepChart';
 import WeightChart from '@/components/WeightChart';
+import CaloriesChart from '@/components/CaloriesChart';
 import { Habit, HabitLog, Day } from '@/types';
 import Link from 'next/link';
-import { ArrowLeft, BarChart, Plus, Moon, Scale } from 'lucide-react';
+import { ArrowLeft, BarChart, Plus, Moon, Scale, Flame } from 'lucide-react';
 
 export default function MobileStatsPage() {
   const [habits, setHabits] = useState<(Habit & { logs: HabitLog[] })[]>([]);
   const [days, setDays] = useState<Day[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [activeTab, setActiveTab] = useState<'abstinence' | 'sleep' | 'weight'>('abstinence');
+  const [activeTab, setActiveTab] = useState<'abstinence' | 'sleep' | 'weight' | 'calories'>('abstinence');
 
   useEffect(() => {
     fetchData();
@@ -148,6 +149,16 @@ export default function MobileStatsPage() {
                 >
                     Weight
                 </button>
+                <button
+                    onClick={() => setActiveTab('calories')}
+                    className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
+                        activeTab === 'calories' 
+                        ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm' 
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                >
+                    Calories
+                </button>
             </div>
 
             {/* Content */}
@@ -186,13 +197,21 @@ export default function MobileStatsPage() {
                     </div>
                     <SleepChart days={days} />
                 </section>
-            ) : (
+            ) : activeTab === 'weight' ? (
                 <section className="bg-[var(--bg-secondary)] p-6 rounded-xl border border-[var(--border-primary)] animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <div className="flex items-center gap-2 mb-6">
                         <Scale size={20} className="text-amber-400" />
                         <h2 className="text-lg font-semibold text-[var(--text-primary)]">Weight Trends</h2>
                     </div>
                     <WeightChart days={days} />
+                </section>
+            ) : (
+                <section className="bg-[var(--bg-secondary)] p-6 rounded-xl border border-[var(--border-primary)] animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="flex items-center gap-2 mb-6">
+                        <Flame size={20} className="text-green-400" />
+                        <h2 className="text-lg font-semibold text-[var(--text-primary)]">Calorie Trends</h2>
+                    </div>
+                    <CaloriesChart days={days} />
                 </section>
             )}
        </main>

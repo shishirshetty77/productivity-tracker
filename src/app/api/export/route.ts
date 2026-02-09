@@ -86,6 +86,12 @@ export async function GET(request: NextRequest) {
         distracted_blocks: distractedBlocks,
         avg_sleep_hours: avgSleep,
         weight: weightSummary,
+        avg_calories: (() => {
+          const calDays = days.filter((d: { calories: number | null }) => d.calories != null && d.calories > 0);
+          return calDays.length > 0
+            ? Math.round(calDays.reduce((sum: number, d: { calories: number | null }) => sum + (d.calories ?? 0), 0) / calDays.length)
+            : null;
+        })(),
         total_habits: habits.length,
       },
       habits: habits.map((h: { name: string; description: string | null; color: string; icon: string; type: string; goalFrequency: number; createdAt: Date; logs: { date: string; value: number }[] }) => ({
@@ -98,7 +104,7 @@ export async function GET(request: NextRequest) {
         created_at: h.createdAt,
         logs: h.logs.map((l: { date: string; value: number }) => ({ date: l.date, value: l.value }))
       })),
-      days: days.map((day: { date: string; startTime: string; endTime: string; completed: boolean; sleepTime: string | null; wakeTime: string | null; sleepDuration: number | null; sleepQuality: string | null; weight: number | null; timeBlocks: { startTime: string; endTime: string; done: boolean; skipped: boolean; activity: string; rating: string | null }[] }) => ({
+      days: days.map((day: { date: string; startTime: string; endTime: string; completed: boolean; sleepTime: string | null; wakeTime: string | null; sleepDuration: number | null; sleepQuality: string | null; weight: number | null; calories: number | null; timeBlocks: { startTime: string; endTime: string; done: boolean; skipped: boolean; activity: string; rating: string | null }[] }) => ({
       date: day.date,
       day_window: `${day.startTime}-${day.endTime}`,
       completed: day.completed,
@@ -109,6 +115,7 @@ export async function GET(request: NextRequest) {
         quality: day.sleepQuality ?? null,
       },
       weight_kg: day.weight ?? null,
+      calories_kcal: day.calories ?? null,
       intervals: day.timeBlocks.map((block: { startTime: string; endTime: string; done: boolean; skipped: boolean; activity: string; rating: string | null }) => ({
         start: block.startTime,
         end: block.endTime,
@@ -142,6 +149,7 @@ interface DayWithBlocks {
   sleepDuration: number | null;
   sleepQuality: string | null;
   weight: number | null;
+  calories: number | null;
   timeBlocks: {
     startTime: string;
     endTime: string;
@@ -180,6 +188,12 @@ function generateMarkdown(days: DayWithBlocks[]): string {
     if (day.weight) {
       markdown += `\n### ⚖️ Weight\n\n`;
       markdown += `- Weight: ${day.weight} kg\n`;
+    }
+
+    // Calories data
+    if (day.calories) {
+      markdown += `\n### 🔥 Calories\n\n`;
+      markdown += `- Intake: ${day.calories} kcal\n`;
     }
     
     markdown += `\n### Time Blocks\n\n`;

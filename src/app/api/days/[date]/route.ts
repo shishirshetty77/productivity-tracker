@@ -51,7 +51,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { date } = await params;
     const body = await request.json();
-    const { startTime, endTime, completed, sleepTime, wakeTime, sleepDuration, sleepQuality, weight } = body;
+    const { startTime, endTime, completed, sleepTime, wakeTime, sleepDuration, sleepQuality, weight, calories } = body;
 
     const existingDay = await prisma.day.findFirst({
       where: { 
@@ -72,6 +72,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (sleepDuration !== undefined) sleepDataUpdate.sleepDuration = sleepDuration;
     if (sleepQuality !== undefined) sleepDataUpdate.sleepQuality = sleepQuality;
     if (weight !== undefined) sleepDataUpdate.weight = weight != null ? parseFloat(weight) : null;
+    if (calories !== undefined) sleepDataUpdate.calories = calories != null ? parseInt(String(calories)) : null;
 
     // If time window changed, regenerate time blocks
     const timeWindowChanged =

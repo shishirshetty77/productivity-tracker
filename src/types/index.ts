@@ -30,6 +30,7 @@ export type Day = {
     sleepDuration?: number | null;
     sleepQuality?: SleepQuality | null;
     weight?: number | null;
+    calories?: number | null;
 };
 
 export type TimeBlock = {
