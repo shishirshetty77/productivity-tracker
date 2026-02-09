@@ -18,7 +18,7 @@ import {
   PointerSensor,
   TouchSensor,
 } from "@dnd-kit/core";
-import { Calendar, List, Clock, BarChart, Moon, Scale, Flame } from "lucide-react";
+import { Calendar, List, Clock, BarChart, Moon, Scale, Flame, ClipboardList } from "lucide-react";
 
 // Live Clock Component
 function LiveClock() {
@@ -802,6 +802,127 @@ function DashboardCharts({ days }: { days: Day[] }) {
           <CaloriesChart days={days} />
         </div>
       )}
+
+      {/* Track - Daily Health Data Table */}
+      <HealthTrackTable days={days} />
+    </div>
+  );
+}
+
+// Health Track Table Component
+function HealthTrackTable({ days }: { days: Day[] }) {
+  const trackData = [...days]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .filter(d => d.sleepDuration != null || d.weight != null || d.calories != null);
+
+  if (trackData.length === 0) return null;
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr + 'T00:00:00');
+    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  };
+
+  const getSleepColor = (hrs: number) => {
+    if (hrs >= 7 && hrs <= 9) return 'text-green-400';
+    if (hrs >= 6) return 'text-amber-400';
+    return 'text-red-400';
+  };
+
+  const getCalorieColor = (cal: number) => {
+    if (cal >= 1800 && cal <= 2500) return 'text-green-400';
+    if (cal < 1800) return 'text-amber-400';
+    return 'text-red-400';
+  };
+
+  return (
+    <div className="mt-6 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-primary)] overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
+      {/* Header */}
+      <div className="px-4 sm:px-6 py-4 border-b border-[var(--border-primary)] flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <ClipboardList size={18} className="text-[var(--accent-blue)]" />
+          <h3 className="text-base font-semibold text-[var(--text-primary)]">Track</h3>
+        </div>
+        <span className="text-xs text-[var(--text-secondary)]">{trackData.length} entries</span>
+      </div>
+
+      {/* Scrollable Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-[var(--border-primary)] bg-[var(--bg-tertiary)]">
+              <th className="text-left px-4 sm:px-6 py-3 text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Date</th>
+              <th className="text-center px-4 py-3 text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">😴 Sleep</th>
+              <th className="text-center px-4 py-3 text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">⚖️ Weight</th>
+              <th className="text-center px-4 sm:px-6 py-3 text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">🔥 Calories</th>
+            </tr>
+          </thead>
+          <tbody>
+            {trackData.map((day, i) => (
+              <tr
+                key={day.date}
+                className={`border-b border-[var(--border-primary)] last:border-b-0 hover:bg-[var(--bg-tertiary)] transition-colors ${
+                  day.date === getTodayDate() ? 'bg-[var(--accent-blue)]/5' : ''
+                }`}
+              >
+                {/* Date */}
+                <td className="px-4 sm:px-6 py-3 whitespace-nowrap">
+                  <div className="flex flex-col">
+                    <span className="font-medium text-[var(--text-primary)]">{formatDate(day.date)}</span>
+                    <span className="text-xs text-[var(--text-secondary)]">{day.date}</span>
+                  </div>
+                </td>
+
+                {/* Sleep */}
+                <td className="px-4 py-3 text-center whitespace-nowrap">
+                  {day.sleepDuration != null ? (
+                    <div className="flex flex-col items-center">
+                      <span className={`font-semibold ${getSleepColor(day.sleepDuration)}`}>
+                        {day.sleepDuration}h
+                      </span>
+                      {day.sleepQuality && (
+                        <span className="text-xs text-[var(--text-secondary)]">{day.sleepQuality.toLowerCase()}</span>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="text-[var(--text-secondary)]">—</span>
+                  )}
+                </td>
+
+                {/* Weight */}
+                <td className="px-4 py-3 text-center whitespace-nowrap">
+                  {day.weight != null ? (
+                    <div className="flex flex-col items-center">
+                      <span className="font-semibold text-amber-400">{day.weight} kg</span>
+                      {i < trackData.length - 1 && trackData[i + 1].weight != null && (() => {
+                        const diff = Math.round((day.weight! - trackData[i + 1].weight!) * 10) / 10;
+                        if (diff === 0) return null;
+                        return (
+                          <span className={`text-xs ${diff < 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {diff > 0 ? '+' : ''}{diff} kg
+                          </span>
+                        );
+                      })()}
+                    </div>
+                  ) : (
+                    <span className="text-[var(--text-secondary)]">—</span>
+                  )}
+                </td>
+
+                {/* Calories */}
+                <td className="px-4 sm:px-6 py-3 text-center whitespace-nowrap">
+                  {day.calories != null ? (
+                    <span className={`font-semibold ${getCalorieColor(day.calories)}`}>
+                      {day.calories.toLocaleString()} kcal
+                    </span>
+                  ) : (
+                    <span className="text-[var(--text-secondary)]">—</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
