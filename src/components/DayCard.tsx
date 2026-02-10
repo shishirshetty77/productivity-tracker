@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect, ReactNode } from 'react';
 import { Day, SleepQuality, BlockRating } from '@/types';
 import { getTodayDate, calculateCompletionPercentage } from '@/lib/utils';
 import TimeBlockItem from './TimeBlockItem';
-import { ChevronDown, Moon } from 'lucide-react';
+import { ChevronDown, Moon, Flame } from 'lucide-react';
 
 // Sleep quality display helper
 const SLEEP_QUALITY_INFO: Record<SleepQuality, { emoji: string; label: string; color: string }> = {
@@ -279,6 +279,20 @@ export default function DayCard({
                           {SLEEP_QUALITY_INFO[day.sleepQuality as SleepQuality]?.emoji || ''}
                         </span>
                       )}
+                    </div>
+                  )}
+                  
+                  {/* Calories Info Badge */}
+                  {day.calories && (
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-500/10 rounded-full">
+                      <Flame size={12} className="text-green-400" />
+                      <span className={`text-xs font-medium ${
+                        day.calories >= 1800 && day.calories <= 2500 ? 'text-green-400' :
+                        day.calories < 1800 ? 'text-amber-400' :
+                        'text-red-400'
+                      }`}>
+                        {day.calories.toLocaleString()} kcal
+                      </span>
                     </div>
                   )}
                 </div>

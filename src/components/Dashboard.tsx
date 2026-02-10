@@ -6,6 +6,9 @@ import { getTodayDate } from "@/lib/utils";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import DayCard from "@/components/DayCard";
 import CalendarView from "@/components/CalendarView";
+import SleepChart from "@/components/SleepChart";
+import WeightChart from "@/components/WeightChart";
+import CaloriesChart from "@/components/CaloriesChart";
 import Link from "next/link";
 import {
   DndContext,
@@ -15,7 +18,7 @@ import {
   PointerSensor,
   TouchSensor,
 } from "@dnd-kit/core";
-import { Calendar, List, Clock, BarChart } from "lucide-react";
+import { Calendar, List, Clock, BarChart, Moon, Scale, Flame, ClipboardList } from "lucide-react";
 
 // Live Clock Component
 function LiveClock() {
@@ -158,12 +161,13 @@ export default function Dashboard() {
       sleepQuality?: SleepQuality;
     },
     weight?: number,
+    calories?: number,
   ) => {
     try {
       const res = await fetch("/api/days", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date, startTime, endTime, ...sleepData, weight }),
+        body: JSON.stringify({ date, startTime, endTime, ...sleepData, weight, calories }),
       });
       if (res.ok) {
         const day: Day = await res.json();
@@ -631,8 +635,8 @@ export default function Dashboard() {
               wakeTime?: string;
               sleepDuration?: number;
               sleepQuality?: SleepQuality;
-            }, weight?: number) => {
-              createDay(date, startTime, endTime, sleepData, weight);
+            }, weight?: number, calories?: number) => {
+              createDay(date, startTime, endTime, sleepData, weight, calories);
               setShowNewDayModal(false);
             }}
             existingDates={days.map((d) => d.date)}
@@ -708,9 +712,218 @@ export default function Dashboard() {
               }}
             />
           )}
+
+          {/* Health & Wellness Charts */}
+          {days.length > 0 && (
+            <div className="mt-8 space-y-6">
+              <h2 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+                <BarChart size={20} className="text-[var(--accent-blue)]" />
+                Health & Wellness
+              </h2>
+
+              {/* Chart Tabs */}
+              <DashboardCharts days={days} />
+            </div>
+          )}
         </div>
       </main>
     </DndContext>
+  );
+}
+
+// Dashboard Charts Component
+function DashboardCharts({ days }: { days: Day[] }) {
+  const [activeChart, setActiveChart] = useState<'sleep' | 'weight' | 'calories'>('sleep');
+
+  return (
+    <div>
+      {/* Chart Tab Selector */}
+      <div className="flex p-1 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-primary)] mb-4">
+        <button
+          onClick={() => setActiveChart('sleep')}
+          className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+            activeChart === 'sleep'
+              ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+          }`}
+        >
+          <Moon size={14} />
+          <span className="hidden sm:inline">Sleep</span>
+        </button>
+        <button
+          onClick={() => setActiveChart('weight')}
+          className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+            activeChart === 'weight'
+              ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+          }`}
+        >
+          <Scale size={14} />
+          <span className="hidden sm:inline">Weight</span>
+        </button>
+        <button
+          onClick={() => setActiveChart('calories')}
+          className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+            activeChart === 'calories'
+              ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+          }`}
+        >
+          <Flame size={14} />
+          <span className="hidden sm:inline">Calories</span>
+        </button>
+      </div>
+
+      {/* Chart Content */}
+      {activeChart === 'sleep' && (
+        <div className="bg-[var(--bg-secondary)] p-4 sm:p-6 rounded-xl border border-[var(--border-primary)] animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="flex items-center gap-2 mb-4">
+            <Moon size={18} className="text-purple-400" />
+            <h3 className="text-base font-semibold text-[var(--text-primary)]">Sleep Trends</h3>
+          </div>
+          <SleepChart days={days} />
+        </div>
+      )}
+      {activeChart === 'weight' && (
+        <div className="bg-[var(--bg-secondary)] p-4 sm:p-6 rounded-xl border border-[var(--border-primary)] animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="flex items-center gap-2 mb-4">
+            <Scale size={18} className="text-amber-400" />
+            <h3 className="text-base font-semibold text-[var(--text-primary)]">Weight Trends</h3>
+          </div>
+          <WeightChart days={days} />
+        </div>
+      )}
+      {activeChart === 'calories' && (
+        <div className="bg-[var(--bg-secondary)] p-4 sm:p-6 rounded-xl border border-[var(--border-primary)] animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="flex items-center gap-2 mb-4">
+            <Flame size={18} className="text-green-400" />
+            <h3 className="text-base font-semibold text-[var(--text-primary)]">Calorie Trends</h3>
+          </div>
+          <CaloriesChart days={days} />
+        </div>
+      )}
+
+      {/* Track - Daily Health Data Table */}
+      <HealthTrackTable days={days} />
+    </div>
+  );
+}
+
+// Health Track Table Component
+function HealthTrackTable({ days }: { days: Day[] }) {
+  const trackData = [...days]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .filter(d => d.sleepDuration != null || d.weight != null || d.calories != null);
+
+  if (trackData.length === 0) return null;
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr + 'T00:00:00');
+    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  };
+
+  const getSleepColor = (hrs: number) => {
+    if (hrs >= 7 && hrs <= 9) return 'text-green-400';
+    if (hrs >= 6) return 'text-amber-400';
+    return 'text-red-400';
+  };
+
+  const getCalorieColor = (cal: number) => {
+    if (cal >= 1800 && cal <= 2500) return 'text-green-400';
+    if (cal < 1800) return 'text-amber-400';
+    return 'text-red-400';
+  };
+
+  return (
+    <div className="mt-6 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-primary)] overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
+      {/* Header */}
+      <div className="px-4 sm:px-6 py-4 border-b border-[var(--border-primary)] flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <ClipboardList size={18} className="text-[var(--accent-blue)]" />
+          <h3 className="text-base font-semibold text-[var(--text-primary)]">Track</h3>
+        </div>
+        <span className="text-xs text-[var(--text-secondary)]">{trackData.length} entries</span>
+      </div>
+
+      {/* Scrollable Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-[var(--border-primary)] bg-[var(--bg-tertiary)]">
+              <th className="text-left px-4 sm:px-6 py-3 text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Date</th>
+              <th className="text-center px-4 py-3 text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">😴 Sleep</th>
+              <th className="text-center px-4 py-3 text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">⚖️ Weight</th>
+              <th className="text-center px-4 sm:px-6 py-3 text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">🔥 Calories</th>
+            </tr>
+          </thead>
+          <tbody>
+            {trackData.map((day, i) => (
+              <tr
+                key={day.date}
+                className={`border-b border-[var(--border-primary)] last:border-b-0 hover:bg-[var(--bg-tertiary)] transition-colors ${
+                  day.date === getTodayDate() ? 'bg-[var(--accent-blue)]/5' : ''
+                }`}
+              >
+                {/* Date */}
+                <td className="px-4 sm:px-6 py-3 whitespace-nowrap">
+                  <div className="flex flex-col">
+                    <span className="font-medium text-[var(--text-primary)]">{formatDate(day.date)}</span>
+                    <span className="text-xs text-[var(--text-secondary)]">{day.date}</span>
+                  </div>
+                </td>
+
+                {/* Sleep */}
+                <td className="px-4 py-3 text-center whitespace-nowrap">
+                  {day.sleepDuration != null ? (
+                    <div className="flex flex-col items-center">
+                      <span className={`font-semibold ${getSleepColor(day.sleepDuration)}`}>
+                        {day.sleepDuration}h
+                      </span>
+                      {day.sleepQuality && (
+                        <span className="text-xs text-[var(--text-secondary)]">{day.sleepQuality.toLowerCase()}</span>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="text-[var(--text-secondary)]">—</span>
+                  )}
+                </td>
+
+                {/* Weight */}
+                <td className="px-4 py-3 text-center whitespace-nowrap">
+                  {day.weight != null ? (
+                    <div className="flex flex-col items-center">
+                      <span className="font-semibold text-amber-400">{day.weight} kg</span>
+                      {i < trackData.length - 1 && trackData[i + 1].weight != null && (() => {
+                        const diff = Math.round((day.weight! - trackData[i + 1].weight!) * 10) / 10;
+                        if (diff === 0) return null;
+                        return (
+                          <span className={`text-xs ${diff < 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {diff > 0 ? '+' : ''}{diff} kg
+                          </span>
+                        );
+                      })()}
+                    </div>
+                  ) : (
+                    <span className="text-[var(--text-secondary)]">—</span>
+                  )}
+                </td>
+
+                {/* Calories */}
+                <td className="px-4 sm:px-6 py-3 text-center whitespace-nowrap">
+                  {day.calories != null ? (
+                    <span className={`font-semibold ${getCalorieColor(day.calories)}`}>
+                      {day.calories.toLocaleString()} kcal
+                    </span>
+                  ) : (
+                    <span className="text-[var(--text-secondary)]">—</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
 
@@ -766,6 +979,7 @@ function NewDayModal({
       sleepQuality?: SleepQuality;
     },
     weight?: number,
+    calories?: number,
   ) => void;
   existingDates: string[];
 }) {
@@ -782,6 +996,10 @@ function NewDayModal({
   // Weight tracking state
   const [weightValue, setWeightValue] = useState("");
   const [showWeightSection, setShowWeightSection] = useState(false);
+
+  // Calories tracking state
+  const [caloriesValue, setCaloriesValue] = useState("");
+  const [showCaloriesSection, setShowCaloriesSection] = useState(false);
 
   const dateExists = existingDates.includes(selectedDate);
   const isValidTime = startTime < endTime;
@@ -803,7 +1021,11 @@ function NewDayModal({
       ? parseFloat(weightValue)
       : undefined;
 
-    onCreate(selectedDate, startTime, endTime, sleepData, parsedWeight);
+    const parsedCalories = showCaloriesSection && caloriesValue
+      ? parseInt(caloriesValue)
+      : undefined;
+
+    onCreate(selectedDate, startTime, endTime, sleepData, parsedWeight, parsedCalories);
   };
 
   return (
@@ -1033,6 +1255,68 @@ function NewDayModal({
                     placeholder="e.g. 72.5"
                   />
                 </div>
+              </div>
+            )}
+          </div>
+
+          {/* Calories Tracking Section */}
+          <div className="border-t border-[var(--border-primary)] pt-4">
+            <button
+              type="button"
+              onClick={() => setShowCaloriesSection(!showCaloriesSection)}
+              className="flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              <span className="text-lg">🔥</span>
+              <span>Track Calories</span>
+              <svg
+                className={`w-4 h-4 transition-transform ${showCaloriesSection ? "rotate-180" : ""}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+
+            {showCaloriesSection && (
+              <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div>
+                  <label className="block text-sm text-[var(--text-secondary)] mb-2">
+                    🔥 Calories (kcal)
+                  </label>
+                  <input
+                    type="number"
+                    step="1"
+                    min="0"
+                    max="10000"
+                    value={caloriesValue}
+                    onChange={(e) => setCaloriesValue(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-[var(--bg-tertiary)] border border-[var(--border-primary)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-blue)]"
+                    placeholder="e.g. 2000"
+                  />
+                </div>
+                {caloriesValue && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-[var(--text-secondary)]">Intake:</span>
+                    <span className={`font-medium ${
+                      parseInt(caloriesValue) >= 1800 && parseInt(caloriesValue) <= 2500
+                        ? "text-green-400"
+                        : parseInt(caloriesValue) < 1800
+                          ? "text-amber-400"
+                          : "text-red-400"
+                    }`}>
+                      {parseInt(caloriesValue).toLocaleString()} kcal
+                    </span>
+                    {parseInt(caloriesValue) >= 1800 && parseInt(caloriesValue) <= 2500 && <span>✅</span>}
+                    {parseInt(caloriesValue) < 1500 && <span>⚠️ Low</span>}
+                    {parseInt(caloriesValue) > 3000 && <span>⚠️ High</span>}
+                  </div>
+                )}
               </div>
             )}
           </div>

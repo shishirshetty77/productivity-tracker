@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { date, startTime, endTime, sleepTime, wakeTime, sleepDuration, sleepQuality, weight } = body;
+    const { date, startTime, endTime, sleepTime, wakeTime, sleepDuration, sleepQuality, weight, calories } = body;
 
     if (!date || !startTime || !endTime) {
       return NextResponse.json(
@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
         sleepDuration: sleepDuration || null,
         sleepQuality: sleepQuality || null,
         weight: weight != null ? parseFloat(weight) : null,
+        calories: calories != null ? parseInt(calories) : null,
         timeBlocks: {
           create: blocks.map((block) => ({
             startTime: block.startTime,
